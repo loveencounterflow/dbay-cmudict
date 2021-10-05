@@ -32,11 +32,12 @@ class @Cmud
     defaults:
       #.....................................................................................................
       constructor_cfg:
-        db:         null
-        prefix:     'cmud_'
-        schema:     'cmud'
-        path:       PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
-        create:     false
+        db:           null
+        prefix:       'cmud_'
+        schema:       'cmud'
+        path:         PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
+        source_path:  PATH.resolve PATH.join __dirname, '../cmudict-0.7b'
+        create:       false
 
   #---------------------------------------------------------------------------------------------------------
   @cast_constructor_cfg: ( me, cfg = null ) ->
@@ -67,7 +68,7 @@ class @Cmud
     guy.cfg.configure_with_types @, cfg, types
     @_compile_sql()
     @_create_sql_functions()
-    @open_cmu_db()
+    @_open_cmu_db()
     return undefined
 
   #---------------------------------------------------------------------------------------------------------
@@ -113,18 +114,17 @@ class @Cmud
     @db.single_value @sql.get_db_object_count
 
   #---------------------------------------------------------------------------------------------------------
-  open_cmu_db: ->
-    { prefix
-      schema
-      path
-      create } = @cfg
-    @db.open { path, schema, }
-    debug '^938^', @_get_db_object_count()
-    if create or ( @_get_db_object_count() is 0 )
+  _open_cmu_db: ->
+    @db.open @cfg
+    if @cfg.create or ( @_get_db_object_count() is 0 )
       @_create_db_structure()
       @_populate_db()
     else
       null
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _populate_db: ->
     return null
 
 
