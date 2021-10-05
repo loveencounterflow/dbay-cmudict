@@ -1,0 +1,54 @@
+# ARPABET	IPA	Example(s)
+# V/C 1-letter	2-letter	IPA	Example
+V	a	AA	ɑ	b al m, b o t
+V	@	AE	æ	b a t
+V	A	AH	ʌ	b u tt
+V	c	AO	ɔ	st o ry
+V	W	AW	aʊ	b ou t
+V	x	AX	ə	comm a
+V	N/A	AXR	ɚ	lett er
+V	Y	AY	aɪ	b i te
+V	E	EH	ɛ	b e t
+V	R	ER	ɝ	b ir d
+V	e	EY	eɪ	b ai t
+V	I	IH	ɪ	b i t
+V	X	IX	ɨ	ros e s, rabb i t
+V	i	IY	i	b ea t
+V	o	OW	oʊ	b oa t
+V	O	OY	ɔɪ	b oy
+V	U	UH	ʊ	b oo k
+V	u	UW	u	b oo t
+V	N/A	UX	ʉ	d u de
+C	b	B	b	b uy
+C	C	CH	tʃ	Ch ina
+C	d	D	d	d ie
+C	D	DH	ð	th y
+C	F	DX	ɾ	bu tt er
+C	L	EL	l̩	bott le
+C	M	EM	m̩	rhyth m
+C	N	EN	n̩	butt on
+C	f	F	f	f ight
+C	g	G	ɡ	g uy
+C	h	HH	h	h igh
+C	h	H	h	h igh
+C	J	JH	dʒ	j ive
+C	k	K	k	k ite
+C	l	L	l	l ie
+C	m	M	m	m y
+C	n	N	n	n igh
+# C	G	NX	ŋ	si ng
+C	G	NG	ŋ	si ng
+C	N/A	NX	ɾ̃	wi nn er
+C	p	P	p	p ie
+C	Q	Q	ʔ	uh - oh
+C	r	R	ɹ	r ye
+C	s	S	s	s igh
+C	S	SH	ʃ	sh y
+C	t	T	t	t ie
+C	T	TH	θ	th igh
+C	v	V	v	v ie
+C	w	W	w	w ise
+C	H	WH	ʍ	wh y
+C	y	Y	j	y acht
+C	z	Z	z	z oo
+C	Z	ZH	ʒ	plea s ure

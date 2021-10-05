@@ -37,6 +37,7 @@ class @Cmud
         schema:       'cmud'
         path:         PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
         source_path:  PATH.resolve PATH.join __dirname, '../cmudict-0.7b'
+        arpaipa_path: PATH.resolve PATH.join __dirname, '../arpabet-to-ipa.tsv'
         create:       false
 
   #---------------------------------------------------------------------------------------------------------
@@ -79,7 +80,16 @@ class @Cmud
       create table if not exists #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
-          arpabet_s text    not null );"""
+          arpabet_s text    not null );
+      create index if not exists #{schema}.entries_word_idx
+        on entries ( word );
+      create table if not exists #{schema}.abipa (
+        cv          text    not null,
+        ab1         text,
+        ab2         text    not null primary key,
+        ipa         text    not null,
+        example     text    not null );
+      """
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -89,9 +99,13 @@ class @Cmud
     sql         =
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
       truncate_entries:     SQL"delete from #{schema}.entries;"
+      truncate_abipa:       SQL"delete from #{schema}.abipa;"
       insert_entry: SQL"""
         insert into #{schema}.entries ( word, arpabet_s )
           values ( $word, $arpabet_s );"""
+      insert_abipa: SQL"""
+        insert into #{schema}.abipa ( cv, ab1, ab2, ipa, example )
+          values ( $cv, $ab1, $ab2, $ipa, $example );"""
     guy.props.def @, 'sql', { enumerable: false, value: sql, }
     return null
 
@@ -115,6 +129,7 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   _get_db_object_count: -> @db.single_value @sql.get_db_object_count
   _truncate_entries:    -> @db @sql.truncate_entries
+  _truncate_abipa:      -> @db @sql.truncate_abipa
 
   #---------------------------------------------------------------------------------------------------------
   _open_cmu_db: ->
@@ -128,13 +143,18 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _populate_db: ->
+    # @_populate_entries()
+    @_populate_arpabet_to_ipa()
+
+  #---------------------------------------------------------------------------------------------------------
+  _populate_entries: ->
     line_nr = 0
     @_truncate_entries()
     insert = @db.prepare @sql.insert_entry
     @db =>
       for line from guy.fs.walk_lines @cfg.source_path
-        continue if line.startsWith ';;;'
         line_nr++
+        continue if line.startsWith ';;;'
         # break if line_nr > 10
         line = line.trimEnd()
         [ word, arpabet_s, ] = line.split '\x20\x20'
@@ -145,6 +165,34 @@ class @Cmud
         insert.run { word, arpabet_s, }
       return null
     return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _populate_arpabet_to_ipa: ->
+    @_truncate_abipa()
+    line_nr     = 0
+    ipa_by_ab2  = {}
+    insert      = @db.prepare @sql.insert_abipa
+    @db =>
+      for line from guy.fs.walk_lines @cfg.arpaipa_path
+        line_nr++
+        continue if line.startsWith '#'
+        fields            = line.split '\t'
+        fields[ idx ]     = field.trim() for field, idx in fields
+        fields[ idx ]     = null for field, idx in fields when field is 'N/A'
+        [ cv
+          ab1
+          ab2
+          ipa
+          example ]       = fields
+        example           = example.replace /\x20/g, ''
+        ipa_by_ab2[ ab2 ] = ipa
+        insert.run { cv, ab1, ab2, ipa, example, }
+      return null
+    ipa_by_ab2 = guy.lft.freeze ipa_by_ab2
+    guy.props.def @, 'ipa_by_ab2', { enumerable: false, value: ipa_by_ab2, }
+    return null
+
+
 
 
 
