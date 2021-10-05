@@ -86,9 +86,12 @@ class @Cmud
   _compile_sql: ->
     { prefix
       schema }  = @cfg
-    schema_i    = @db.sql.I schema
     sql         =
-      get_db_object_count: SQL"select count(*) as count from #{schema_i}.sqlite_schema;"
+      get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
+      truncate_entries:     SQL"delete from #{schema}.entries;"
+      insert_entry: SQL"""
+        insert into #{schema}.entries ( word, arpabet_s )
+          values ( $word, $arpabet_s );"""
     guy.props.def @, 'sql', { enumerable: false, value: sql, }
     return null
 
@@ -110,8 +113,8 @@ class @Cmud
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _get_db_object_count: ->
-    @db.single_value @sql.get_db_object_count
+  _get_db_object_count: -> @db.single_value @sql.get_db_object_count
+  _truncate_entries:    -> @db @sql.truncate_entries
 
   #---------------------------------------------------------------------------------------------------------
   _open_cmu_db: ->
@@ -125,6 +128,22 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _populate_db: ->
+    line_nr = 0
+    @_truncate_entries()
+    insert = @db.prepare @sql.insert_entry
+    @db =>
+      for line from guy.fs.walk_lines @cfg.source_path
+        continue if line.startsWith ';;;'
+        line_nr++
+        # break if line_nr > 10
+        line = line.trimEnd()
+        [ word, arpabet_s, ] = line.split '\x20\x20'
+        continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
+        continue if ( word.match /'S\(\d\)$/ )?
+        unless word? and word.length > 0 and arpabet_s? and arpabet_s.length > 0
+          warn '^4443^', line_nr, ( rpr line )
+        insert.run { word, arpabet_s, }
+      return null
     return null
 
 
