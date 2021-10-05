@@ -80,7 +80,8 @@ class @Cmud
       create table if not exists #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
-          arpabet_s text    not null );
+          arpabet_s text    not null,
+          ipa       text    not null );
       create index if not exists #{schema}.entries_word_idx
         on entries ( word );
       create table if not exists #{schema}.abipa (
@@ -101,8 +102,8 @@ class @Cmud
       truncate_entries:     SQL"delete from #{schema}.entries;"
       truncate_abipa:       SQL"delete from #{schema}.abipa;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, arpabet_s )
-          values ( $word, $arpabet_s );"""
+        insert into #{schema}.entries ( word, arpabet_s, ipa )
+          values ( $word, $arpabet_s, $ipa );"""
       insert_abipa: SQL"""
         insert into #{schema}.abipa ( cv, ab1, ab2, ipa, example )
           values ( $cv, $ab1, $ab2, $ipa, $example );"""
@@ -143,26 +144,27 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _populate_db: ->
-    # @_populate_entries()
     @_populate_arpabet_to_ipa()
+    @_populate_entries()
 
   #---------------------------------------------------------------------------------------------------------
   _populate_entries: ->
-    line_nr = 0
+    count = 0
     @_truncate_entries()
     insert = @db.prepare @sql.insert_entry
     @db =>
       for line from guy.fs.walk_lines @cfg.source_path
-        line_nr++
         continue if line.startsWith ';;;'
-        # break if line_nr > 10
         line = line.trimEnd()
         [ word, arpabet_s, ] = line.split '\x20\x20'
         continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
         continue if ( word.match /'S\(\d\)$/ )?
         unless word? and word.length > 0 and arpabet_s? and arpabet_s.length > 0
-          warn '^4443^', line_nr, ( rpr line )
-        insert.run { word, arpabet_s, }
+          warn '^4443^', count, ( rpr line )
+          continue
+        count++
+        ipa = @ipa_from_arpabet_s arpabet_s
+        insert.run { word, arpabet_s, ipa, }
       return null
     return null
 
@@ -192,9 +194,19 @@ class @Cmud
     guy.props.def @, 'ipa_by_ab2', { enumerable: false, value: ipa_by_ab2, }
     return null
 
+  #=========================================================================================================
+  #
+  #---------------------------------------------------------------------------------------------------------
+  # ipa_from_arpabet_s_1: ( arpabet_s ) ->
+  #   R = arpabet_s.replace /\b[\S]+?\b/g, ( match ) =>
+  #     match = match.replace /\d+$/, ''
+  #     return @ipa_by_ab2[ match ] ? '?'
+  #   return R.replace /\s/g, ''
 
-
-
+  #---------------------------------------------------------------------------------------------------------
+  ipa_from_arpabet_s: ( arpabet_s ) ->
+    R = arpabet_s.split '\x20'
+    return ( @ipa_by_ab2[ ( phone.replace /\d+$/, '' ) ] ? '?' for phone, idx in R ).join ''
 
 
 
