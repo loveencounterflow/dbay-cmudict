@@ -30,7 +30,7 @@
   "homepage": "https://github.com/loveencounterflow/dbay-cmudict#readme",
   "dependencies": {
     "cnd": "9.2.2",
-    "guy": "^2.3.0",
+    "guy": "2.4.0",
     "intertype": "7.6.7"
   },
   "devDependencies": {
