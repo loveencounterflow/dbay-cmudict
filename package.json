@@ -1,0 +1,36 @@
+{
+  "name": "dbay-cmudict",
+  "version": "0.0.0",
+  "description": "An SQLite version of the CMU Pronouncing Dictionary, a DBay demo project",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "coffee --map -o lib -c src",
+    "test": "echo see 'https://github.com/loveencounterflow/hengist/tree/master/dev/dbay-cmudict'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loveencounterflow/dbay-cmudict.git"
+  },
+  "keywords": [
+    "sql",
+    "sqlite",
+    "db",
+    "cmu",
+    "cmudict",
+    "IPA",
+    "pronounciation",
+    "arpabet",
+    "yesql"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/dbay-cmudict/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/dbay-cmudict#readme",
+  "dependencies": {
+    "cnd": "9.2.2",
+    "guy": "^2.3.0",
+    "intertype": "7.6.7"
+  }
+}
