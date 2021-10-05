@@ -32,5 +32,11 @@
     "cnd": "9.2.2",
     "guy": "^2.3.0",
     "intertype": "7.6.7"
+  },
+  "devDependencies": {
+    "dbay": "0.110.0"
+  },
+  "peerDependencies": {
+    "dbay": "^0.109.0"
   }
 }

@@ -1,0 +1,63 @@
+lockfileVersion: 5.3
+
+specifiers:
+  cnd: 9.2.2
+  dbay: 0.110.0
+  guy: ^2.3.0
+  intertype: 7.6.7
+
+dependencies:
+  cnd: 9.2.2
+  guy: 2.3.0
+  intertype: 7.6.7
+
+devDependencies:
+  dbay: 0.110.0
+
+packages:
+
+  /cnd/9.2.2:
+    resolution: {integrity: sha512-F+/H+7luk4fZkvN0+MT0I2nwn80YM/EtfMttNUFxENR50XJH4g0KgQevzeyEJ8B6t6l8Tb4Xti6QAksa8DmePA==}
+    hasBin: true
+    dependencies:
+      jsx-number-format: 0.1.4
+
+  /dbay/0.110.0:
+    resolution: {integrity: sha512-lNB7VEtrlt06c+RbfnzUmjRUqb9ssTOPsJ+v/Y6AAulfrf6qPV/k1t87hEawMErQiktSALaZgDVJtjAts/wc/Q==}
+    requiresBuild: true
+    dependencies:
+      cnd: 9.2.2
+      exit-hook: 2.2.1
+      guy: 2.3.0
+      intertype: 7.6.7
+    transitivePeerDependencies:
+      - deasync
+    dev: true
+
+  /exit-hook/2.2.1:
+    resolution: {integrity: sha512-eNTPlAD67BmP31LDINZ3U7HSF8l57TxOY2PmBJ1shpCvpnxBF93mWCE8YHBnXs8qiUZJc9WDcWIeC3a2HIAMfw==}
+    engines: {node: '>=6'}
+    dev: true
+
+  /guy/2.3.0:
+    resolution: {integrity: sha512-tAOe7lJUi0RylpuZICAJSsApylGANmX2a/FFb5N/CRwy5JzR67HoDGVLeOjUr25aFee9n092BYu+Y5B1P9h/mg==}
+    peerDependencies:
+      deasync: ^0.1.22
+    dependencies:
+      cnd: 9.2.2
+      intertype: 7.6.7
+      letsfreezethat: 3.1.0
+
+  /intertype/7.6.7:
+    resolution: {integrity: sha512-vBgYabqxX3fLa9f0Z3QeXgYszadAGdAHXdLcdQc5ZxZSG5CmbJCdYcudZLYtgmNo8epQag8zzyg7wwx+OD5J8g==}
+    dependencies:
+      multimix: 5.0.0
+
+  /jsx-number-format/0.1.4:
+    resolution: {integrity: sha512-uPc/Q90XqZoRE7Cu1OLFQB2cSrA2Dy8+okzPOtML8vbagNFDSipbndIPme+q0odBjEhL+wf3WH3Wo52was4Tsg==}
+
+  /letsfreezethat/3.1.0:
+    resolution: {integrity: sha512-jJ1nvvQi6unW0WifjNPMIb64Byom0EXzSKWFYA++EpyjK3qv1J2pqeSoEJ61tGJoNG0GoNjPoeLYhxW16riZaA==}
+
+  /multimix/5.0.0:
+    resolution: {integrity: sha512-N9cdGSDDD7kxOV7R6e4iZqsHTZ4F4iiSDWqMcVqx4gEH6HBtRXav39Gj3fgT1YqvBcwPCQuf0Oa5R2cDaLWK8A==}
