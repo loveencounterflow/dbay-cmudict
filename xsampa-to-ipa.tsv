@@ -1,0 +1,133 @@
+# derived from https://en.wikipedia.org/wiki/X-SAMPA
+
+# X-SAMPA	IPA	IPA image	Description	Examples
+a	a		open front unrounded vowel	French d a me [dam]
+b	b		voiced bilabial plosive	English b ed [bEd] , French b on [bO~]
+b_<	ɓ		voiced bilabial implosive	Sindhi ɓarʊ [ b_<arU ]
+c	c		voiceless palatal plosive	"Hungarian la ty ak [\"lQcQk]"
+d	d		voiced alveolar plosive	English d ig [dIg] , French d oigt [dwa]
+d`	ɖ		voiced retroflex plosive	Swedish ho rd  [hu:d`]
+d_<	ɗ		voiced alveolar implosive	Sindhi ɗarʊ [ d_<arU ]
+e	e		close-mid front unrounded vowel	French bl é  [ble]
+f	f		voiceless labiodental fricative	English f ive [faIv] , French f emme [fam]
+g	ɡ		voiced velar plosive	English g ame [geIm] , French lon gu e [lO~g]
+g_<	ɠ		voiced velar implosive	Sindhi ɠəro [ g_<@ro ]
+h	h		voiceless glottal fricative	English h ouse [haUs]
+h\	ɦ		voiced glottal fricative	Czech hrad [h\rat]
+i	i		close front unrounded vowel	English b e  [bi:] , French ou i  [wi] , Spanish s i  [si]
+j	j		palatal approximant	English y es [jEs] , French y eux [j2]
+j\	ʝ		voiced palatal fricative	Greek γ ειά [j\a]
+k	k		voiceless velar plosive	"English s c at [sk{t] , Spanish c arro [\"karo]"
+l	l		alveolar lateral approximant	English l ay [leI] , French ma l  [mal]
+l`	ɭ		retroflex lateral approximant	Svealand Swedish so rl  [so:l`]
+l\	ɺ		alveolar lateral flap	Wayuu püü l ükü [pM:l\MkM]
+m	m		bilabial nasal	English m ouse [maUs] , French ho mm e [Om]
+n	n		alveolar nasal	English n ap [n{p] , French n on [nO~]
+n`	ɳ		retroflex nasal	Swedish hö rn  [h2:n`]
+o	o		close-mid back rounded vowel	French v eau  [vo]
+p	p		voiceless bilabial plosive	"English s p eak [spik] , French p ose [poz] , Spanish p erro [\"pero]"
+p\	ɸ		voiceless bilabial fricative	Japanese f uku [p\M_0kM]
+q	q		voiceless uvular plosive	"Arabic q asbah [\"qQs_Gba]"
+r	r		alveolar trill	"Spanish pe rr o [\"pero]"
+r`	ɽ		retroflex flap	Bengali ga r i [gar`i:]
+r\	ɹ		alveolar approximant	English r ed [r\Ed]
+r\`	ɻ		retroflex approximant	"Malayalam വഴി [\"v@r\`i]"
+s	s		voiceless alveolar fricative	"English s eem [si:m] , French s e ss ion [sE\"sjO~]"
+s`	ʂ		voiceless retroflex fricative	Swedish ma rs  [mas`]
+s\	ɕ		voiceless alveolo-palatal fricative	Polish ś wierszcz [s\v'ers`ts`]
+t	t		voiceless alveolar plosive	"English s t ew [stju:] , French ra t é [Ra\"te]"
+t`	ʈ		voiceless retroflex plosive	Swedish mö rt  [m2t`]
+u	u		close back rounded vowel	English b oo m [bu:m] , Spanish s u  [su]
+v	v		voiced labiodental fricative	English v est [vEst] , French v oix [vwa]
+v\ (or P )	ʋ		labiodental approximant	Dutch w est [v\Est] / [PEst]
+w	w		labial-velar approximant	English w est [wEst] , French ou i [wi]
+x	x		voiceless velar fricative	Scots lo ch  [lOx] or [5Ox] ; German Bu ch , Da ch ; Spanish ca j a, g estión
+x\	ɧ		voiceless palatal-velar fricative	Swedish sj al [x\A:l]
+y	y		close front rounded vowel	"French t u  [ty] German ü ber [\"y:b6]"
+z	z		voiced alveolar fricative	"English z oo [zu:] , French a z ote [a\"zOt]"
+z`	ʐ		voiced retroflex fricative	Mandarin Chinese r ang [z`aN]
+z\	ʑ		voiced alveolo-palatal fricative	"Polish ź rebak [\"z\rEbak]"
+A	ɑ		open back unrounded vowel	"English f a ther [ \"fA:D@ ( r\ )] (RP and Gen.Am.)"
+B	β		voiced bilabial fricative	"Spanish la v ar [la\"Ba4]"
+B\	ʙ		bilabial trill	"Reminiscent of shivering (\"brrr\")"
+C	ç		voiceless palatal fricative	"German i ch  [IC] , English h uman [\"Cjum@n] (broad transcription uses [ hj -])"
+D	ð		voiced dental fricative	English th en [DEn]
+E	ɛ		open-mid front unrounded vowel	French m ê me [mE:m] , English m e t [mEt] (RP and Gen.Am.)
+F	ɱ		labiodental nasal	"English e m phasis [\"EFf@sIs] (spoken quickly, otherwise uses [ Emf -])"
+G	ɣ		voiced velar fricative	"Greek γ ωνία [Go\"nia]"
+G\	ɢ		voiced uvular plosive	Inuktitut ni r ivvik [niG\ivvik]
+G\_<	ʛ		voiced uvular implosive	Mam ʛa [ G\_<a ]
+H	ɥ		labial-palatal approximant	ce h u it [Hit]
+H\	ʜ		voiceless epiglottal fricative	Agul ме хӀ  [mEH\]
+I	ɪ		near-close front unrounded vowel	English k i t [kIt]
+I\	ᵻ		near-close central unrounded vowel (non-IPA)	Polish r y ba [rI\bA]
+J	ɲ		palatal nasal	"Spanish a ñ o [\"aJo] , English ca ny on [\"k{J@n] (broad transcription uses [- nj -])"
+J\	ɟ		voiced palatal plosive	Hungarian e gy  [EJ\]
+J\_<	ʄ		voiced palatal implosive	Sindhi ʄaro [ J\_<aro ]
+K	ɬ		voiceless alveolar lateral fricative	Welsh ll aw [KaU]
+K\	ɮ		voiced alveolar lateral fricative	Mongolian до л оо [tOK\O:]
+L	ʎ		palatal lateral approximant	"Italian fami gli a [fa\"miLLa] , Castilian ll amar [La\"mar]"
+L\	ʟ		velar lateral approximant	Korean 달 구지 [t6L\gudz\i]
+M	ɯ		close back unrounded vowel	Korean 음 식 [M:ms\_hik_}]
+M\	ɰ		velar approximant	"Spanish fue g o [\"fweM\o]"
+N	ŋ		velar nasal	English thi ng  [TIN]
+N\	ɴ		uvular nasal	Japanese sa n  [saN\]
+O	ɔ		open-mid back rounded vowel	American English o ff [O:f]
+O\	ʘ		bilabial click	
+P	ʋ		labiodental approximant	Dutch w est [PEst] / [v\Est] , allophone of English phoneme /r\/
+v\	ʋ		labiodental approximant	Dutch w est [PEst] / [v\Est] , allophone of English phoneme /r\/
+Q	ɒ		open back rounded vowel	RP l o t [lQt]
+R	ʁ		voiced uvular fricative	German r ein [RaIn]
+R\	ʀ		uvular trill	French r oi [R\wa]
+S	ʃ		voiceless postalveolar fricative	English sh ip [SIp]
+T	θ		voiceless dental fricative	English th in [TIn]
+U	ʊ		near-close back rounded vowel	English f oo t [fUt]
+U\	ᵿ		near-close central rounded vowel (non-IPA)	"English  e u phoria [jU\\"fO@r\i@]"
+V	ʌ		open-mid back unrounded vowel	Scottish English str u t [str\Vt]
+W	ʍ		voiceless labial-velar fricative	Scots wh en [WEn]
+X	χ		voiceless uvular fricative	Klallam sχaʔqʷaʔ  [sXa?q_wa?]
+X\	ħ		voiceless pharyngeal fricative	Arabic <ح> h a’ [X\A:]
+Y	ʏ		near-close front rounded vowel	German h ü bsch [hYpS]
+Z	ʒ		voiced postalveolar fricative	"English vi s ion [\"vIZ@n]"
+.	.		syllable break
+"\""	ˈ		primary stress
+%	ˌ		secondary stress	"American English pro nun ciation [pr\@%nVn.si.\"eI.S@n]"
+'	ʲ		palatalized	"Russian Земля (Earth) [z'I\"ml'a] or [z_jI\"ml_ja]"
+_j	ʲ		palatalized	"Russian Земля (Earth) [z'I\"ml'a] or [z_jI\"ml_ja]"
+:	ː		long
+:\	ˑ		half long	Estonian differentiates three vowel lengths
+-			separator	Polish trz y [t-S1] vs. cz y [tS1] (affricate)
+@	ə		schwa	"English a ren a  [@\"r\i:n@]"
+@\	ɘ		close-mid central unrounded vowel	Paicĩ kɘ̄ɾɘ  [k@\_M4@\_M]
+@`	ɚ		r-coloured schwa	"American English col or  [\"kVl@`]"
+{	æ		near-open front unrounded vowel	English tr a p [tr\{p]
+}	ʉ		close central rounded vowel	Swedish sj u  [x\}:] ; AuE/NZE b oo t [b}:t]
+1	ɨ		close central unrounded vowel	"Welsh t u  [t1] , American English ros e' s [\"r\oUz1z]"
+2	ø		close-mid front rounded vowel	"Danish købe [\"k2:b@] , French d eu x [d2]"
+3	ɜ		open-mid central unrounded vowel	English n ur se [n3:s] (RP) or [n3`s] (Gen.Am.)
+3`	ɝ		rhotic open-mid central unrounded vowel	English [n3`s] (Gen.Am.)
+3\	ɞ		open-mid central rounded vowel	Irish t omha il [t3\:l']
+4	ɾ		alveolar flap	"Spanish pe r o [\"pe4o] , American English be tt er [\"bE4@`]"
+5	ɫ		velarized alveolar lateral approximant ; also see _e	"English mi l k [mI5k] , Portuguese l ivro [\"5iv4u]"
+6	ɐ		near-open central vowel	"German bess er  [\"bEs6] , Australian English m u d [m6d]"
+7	ɤ		close-mid back unrounded vowel	Estonian k õ ik [k7ik] , Vietnamese m ơ  [m7_M]
+8	ɵ		close-mid central rounded vowel	Swedish b u ss [b8s]
+9	œ		open-mid front rounded vowel	French n eu f [n9f] , Danish dr ø mme [dR9m@]
+&	ɶ		open front rounded vowel	Swedish sk ö rd [x\&d`]
+?	ʔ		glottal stop	"Cockney English bo tt le [\"bQ?o]"
+?\	ʕ		voiced pharyngeal fricative	Arabic  ع (`ayn) [?\Ajn]
+*			"undefined escape character, SAMPA's \"conjunctor\""
+/			indeterminacy in French vowels
+<			begin nonsegmental notation (e.g., SAMPROSA )
+<\	ʢ		voiced epiglottal fricative	Siwi arˤbˤə ʢ a (four) [ar_?\b_?\@<\a]
+>			end nonsegmental notation
+>\	ʡ		epiglottal plosive	Archi гӀарз (complaint) [>\arz]
+^	ꜛ		upstep
+!	ꜜ		downstep
+!\	ǃ		postalveolar click	Zulu i q a q a (polecat) [i:!\a:\a]
+|	|		minor (foot) group
+|\	ǀ		dental click	Zulu i c i c i (earring) [i:|\i:|\i]
+||	‖		major (intonation) group
+|\|\	ǁ		alveolar lateral click	Zulu x o x a (to converse) [|\|O:|\|a]
+=\	ǂ		palatal click
+-\	‿		linking mark

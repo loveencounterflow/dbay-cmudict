@@ -37,7 +37,8 @@ class @Cmud
         schema:       'cmud'
         path:         PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
         source_path:  PATH.resolve PATH.join __dirname, '../cmudict-0.7b'
-        arpaipa_path: PATH.resolve PATH.join __dirname, '../arpabet-to-ipa.tsv'
+        abipa_path:   PATH.resolve PATH.join __dirname, '../arpabet-to-ipa.tsv'
+        xsipa_path:   PATH.resolve PATH.join __dirname, '../xsampa-to-ipa.tsv'
         create:       false
 
   #---------------------------------------------------------------------------------------------------------
@@ -77,17 +78,38 @@ class @Cmud
     { prefix
       schema } = @cfg
     @db.execute SQL"""
-      create table if not exists #{schema}.entries (
+      drop index if exists #{schema}.entries_word_idx;
+      drop index if exists #{schema}.entries_arpabet_idx;
+      drop index if exists #{schema}.entries_xsampa_idx;
+      drop index if exists #{schema}.entries_ipa_idx;
+      drop table if exists #{schema}.entries;
+      drop table if exists #{schema}.abipa;
+      drop table if exists #{schema}.xsipa;
+      -- ...................................................................................................
+      create table #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
           arpabet_s text    not null,
+          arpabet   text    not null,
+          xsampa    text    not null,
           ipa       text    not null );
-      create index if not exists #{schema}.entries_word_idx
+      create index #{schema}.entries_word_idx
         on entries ( word );
-      create table if not exists #{schema}.abipa (
+      create index #{schema}.entries_arpabet_idx
+        on entries ( arpabet );
+      create index #{schema}.entries_xsampa_idx
+        on entries ( xsampa );
+      create index #{schema}.entries_ipa_idx
+        on entries ( ipa );
+      create table #{schema}.abipa (
         cv          text    not null,
         ab1         text,
         ab2         text    not null primary key,
+        ipa         text    not null,
+        example     text    not null );
+      create table #{schema}.xsipa (
+        description text,
+        xs          text    not null primary key,
         ipa         text    not null,
         example     text    not null );
       """
@@ -101,12 +123,16 @@ class @Cmud
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
       truncate_entries:     SQL"delete from #{schema}.entries;"
       truncate_abipa:       SQL"delete from #{schema}.abipa;"
+      truncate_xsipa:       SQL"delete from #{schema}.xsipa;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, arpabet_s, ipa )
-          values ( $word, $arpabet_s, $ipa );"""
+        insert into #{schema}.entries ( word, arpabet_s, arpabet, xsampa, ipa )
+          values ( $word, $arpabet_s, $arpabet, $xsampa, $ipa );"""
       insert_abipa: SQL"""
         insert into #{schema}.abipa ( cv, ab1, ab2, ipa, example )
           values ( $cv, $ab1, $ab2, $ipa, $example );"""
+      insert_xsipa: SQL"""
+        insert into #{schema}.xsipa ( description, xs, ipa, example )
+          values ( $description, $xs, $ipa, $example );"""
     guy.props.def @, 'sql', { enumerable: false, value: sql, }
     return null
 
@@ -131,6 +157,7 @@ class @Cmud
   _get_db_object_count: -> @db.single_value @sql.get_db_object_count
   _truncate_entries:    -> @db @sql.truncate_entries
   _truncate_abipa:      -> @db @sql.truncate_abipa
+  _truncate_xsipa:      -> @db @sql.truncate_xsipa
 
   #---------------------------------------------------------------------------------------------------------
   _open_cmu_db: ->
@@ -145,6 +172,7 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   _populate_db: ->
     @_populate_arpabet_to_ipa()
+    @_populate_xsampa_to_ipa()
     @_populate_entries()
 
   #---------------------------------------------------------------------------------------------------------
@@ -155,16 +183,23 @@ class @Cmud
     @db =>
       for line from guy.fs.walk_lines @cfg.source_path
         continue if line.startsWith ';;;'
-        line = line.trimEnd()
-        [ word, arpabet_s, ] = line.split '\x20\x20'
+        line                  = line.trimEnd()
+        [ word, arpabet_s,  ] = line.split '\x20\x20'
+        word                  = word.trim()
+        arpabet_s             = arpabet_s.trim()
         continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
         continue if ( word.match /'S\(\d\)$/ )?
         unless word? and word.length > 0 and arpabet_s? and arpabet_s.length > 0
           warn '^4443^', count, ( rpr line )
           continue
+        #...................................................................................................
         count++
-        ipa = @ipa_from_arpabet_s arpabet_s
-        insert.run { word, arpabet_s, ipa, }
+        word      = word.toLowerCase()
+        arpabet_s = arpabet_s.toLowerCase()
+        arpabet   = arpabet_s.replace /\s+/g, ''
+        ipa       = @ipa_from_arpabet_s arpabet_s
+        xsampa    = @xsampa_from_ipa    ipa
+        insert.run { word, arpabet_s, arpabet, xsampa, ipa, }
       return null
     return null
 
@@ -175,8 +210,10 @@ class @Cmud
     ipa_by_ab2  = {}
     insert      = @db.prepare @sql.insert_abipa
     @db =>
-      for line from guy.fs.walk_lines @cfg.arpaipa_path
+      for line from guy.fs.walk_lines @cfg.abipa_path
         line_nr++
+        line              = line.trim()
+        continue if line.length is 0
         continue if line.startsWith '#'
         fields            = line.split '\t'
         fields[ idx ]     = field.trim() for field, idx in fields
@@ -186,12 +223,50 @@ class @Cmud
           ab2
           ipa
           example ]       = fields
+        ab1               = ab1.toLowerCase() if ab1
+        ab2               = ab2.toLowerCase()
         example           = example.replace /\x20/g, ''
         ipa_by_ab2[ ab2 ] = ipa
         insert.run { cv, ab1, ab2, ipa, example, }
       return null
     ipa_by_ab2 = guy.lft.freeze ipa_by_ab2
     guy.props.def @, 'ipa_by_ab2', { enumerable: false, value: ipa_by_ab2, }
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _undoublequote: ( text ) ->
+    return text unless text[ 0                          ] is '"'
+    return text unless text[ last_idx = text.length - 1 ] is '"'
+    return text[ 1 ... last_idx ]
+
+  #---------------------------------------------------------------------------------------------------------
+  _populate_xsampa_to_ipa: ->
+    @_truncate_xsipa()
+    line_nr     = 0
+    xs_by_ipa   = {}
+    insert      = @db.prepare @sql.insert_xsipa
+    @db =>
+      for line from guy.fs.walk_lines @cfg.xsipa_path
+        line_nr++
+        line              = line.trim()
+        continue if line.length is 0
+        continue if line.startsWith '#'
+        fields            = line.split '\t'
+        fields[ idx ]     = field.trim() for field, idx in fields
+        # fields[ idx ]     = null for field, idx in fields when field is 'N/A'
+        [ xs
+          ipa
+          _
+          description
+          example ]       = fields
+        example          ?= "(no example)"
+        example           = @_undoublequote example
+        example           = example.replace /\\"/g, '"'
+        xs_by_ipa[ ipa ]  = xs
+        insert.run { description, xs, ipa, example, }
+      return null
+    xs_by_ipa = guy.lft.freeze xs_by_ipa
+    guy.props.def @, 'xs_by_ipa', { enumerable: false, value: xs_by_ipa, }
     return null
 
   #=========================================================================================================
@@ -206,7 +281,12 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   ipa_from_arpabet_s: ( arpabet_s ) ->
     R = arpabet_s.split '\x20'
-    return ( @ipa_by_ab2[ ( phone.replace /\d+$/, '' ) ] ? '?' for phone, idx in R ).join ''
+    return ( @ipa_by_ab2[ ( phone.replace /\d+$/, '' ) ] ? '█' for phone in R ).join ''
+
+  #---------------------------------------------------------------------------------------------------------
+  xsampa_from_ipa: ( ipa ) ->
+    R = Array.from ipa
+    return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
 
 
 
