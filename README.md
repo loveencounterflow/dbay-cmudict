@@ -40,6 +40,7 @@ https://github.com/Alexir/CMUdict
     arcturus(1) │ aa2 r k t er1 ah0 s     │ aa2rkter1ah0s    │ Ar\kt3`Vs  │ ɑɹktɝʌs
     ```
 
+  * therefore, rewrite `arpabet_s` `er(\d)` as `ah$1 r`
 
 
 
