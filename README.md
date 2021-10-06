@@ -29,7 +29,16 @@ https://github.com/Alexir/CMUdict
 * **[+]** remove ambiguity (using stress marks?):
   * ```@` ɚ Xsampa-at'.png  r-coloured schwa  American English color ["kVl@`]```
   * ```3` ɝ   rhotic open-mid central unrounded vowel English [n3`s] (Gen.Am.)```
+  * however, looking at the treatment of rhotic sounds in `arcturus`: `aa2 r k t er1 ah0 s`, `ɑɹktɝʌs` vs
+    it would seem that the special symbol `ɝ` is not warranted: the first vowel in AmE *arctic* /ɑɹktɪk/
+    is very much a rhotic vowel written with two consecutive symbols, so why would you write, say, *urge*
+    as /ɝdʒ/ with a single symbol instead of as /ɜrdʒ/?
 
+    ```
+    arctic      │ aa1 r k t ih0 k         │ aa1rktih0k       │ Ar\ktIk    │ ɑɹktɪk
+    arcturus    │ aa2 r k t uh1 r ah0 s   │ aa2rktuh1rah0s   │ Ar\ktUr\Vs │ ɑɹktʊɹʌs
+    arcturus(1) │ aa2 r k t er1 ah0 s     │ aa2rkter1ah0s    │ Ar\kt3`Vs  │ ɑɹktɝʌs
+    ```
 
 
 
