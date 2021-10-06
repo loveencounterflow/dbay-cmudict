@@ -23,6 +23,6 @@ https://github.com/Alexir/CMUdict
 ## To Do
 
 * **[–]** add table with phone occurrences
-* **[–]** make entries lower case?
-* **[–]** add column `arpabet` with spaces removed
-* **[–]** add [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
+* **[+]** make entries lower case?
+* **[+]** add column `arpabet` with spaces removed
+* **[+]** add [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
