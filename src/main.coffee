@@ -79,7 +79,8 @@ class @Cmud
       schema } = @cfg
     @db.execute SQL"""
       drop index if exists #{schema}.entries_word_idx;
-      drop index if exists #{schema}.entries_arpabet_idx;
+      drop index if exists #{schema}.entries_abs0_idx;
+      drop index if exists #{schema}.entries_abs1_idx;
       drop index if exists #{schema}.entries_xsampa_idx;
       drop index if exists #{schema}.entries_ipa_idx;
       drop table if exists #{schema}.entries;
@@ -89,14 +90,16 @@ class @Cmud
       create table #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
-          arpabet_s text    not null,
-          arpabet   text    not null,
+          abs0      text    not null,
+          abs1      text    not null,
           xsampa    text    not null,
           ipa       text    not null );
       create index #{schema}.entries_word_idx
         on entries ( word );
-      create index #{schema}.entries_arpabet_idx
-        on entries ( arpabet );
+      create index #{schema}.entries_abs0_idx
+        on entries ( abs0 );
+      create index #{schema}.entries_abs1_idx
+        on entries ( abs1 );
       create index #{schema}.entries_xsampa_idx
         on entries ( xsampa );
       create index #{schema}.entries_ipa_idx
@@ -125,8 +128,8 @@ class @Cmud
       truncate_abipa:       SQL"delete from #{schema}.abipa;"
       truncate_xsipa:       SQL"delete from #{schema}.xsipa;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, arpabet_s, arpabet, xsampa, ipa )
-          values ( $word, $arpabet_s, $arpabet, $xsampa, $ipa );"""
+        insert into #{schema}.entries ( word, abs0, abs1, xsampa, ipa )
+          values ( $word, $abs0, $abs1, $xsampa, $ipa );"""
       insert_abipa: SQL"""
         insert into #{schema}.abipa ( cv, ab1, ab2, ipa, example )
           values ( $cv, $ab1, $ab2, $ipa, $example );"""
@@ -184,22 +187,21 @@ class @Cmud
       for line from guy.fs.walk_lines @cfg.source_path
         continue if line.startsWith ';;;'
         line                  = line.trimEnd()
-        [ word, arpabet_s,  ] = line.split '\x20\x20'
+        [ word, abs0,  ] = line.split '\x20\x20'
         word                  = word.trim()
-        arpabet_s             = arpabet_s.trim()
         continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
         continue if ( word.match /'S\(\d\)$/ )?
-        unless word? and word.length > 0 and arpabet_s? and arpabet_s.length > 0
+        unless word? and word.length > 0 and abs0? and abs0.length > 0
           warn '^4443^', count, ( rpr line )
           continue
         #...................................................................................................
         count++
         word      = word.toLowerCase()
-        arpabet_s = arpabet_s.toLowerCase()
-        arpabet   = arpabet_s.replace /\s+/g, ''
-        ipa       = @ipa_from_arpabet_s arpabet_s
-        xsampa    = @xsampa_from_ipa    ipa
-        insert.run { word, arpabet_s, arpabet, xsampa, ipa, }
+        abs0      = abs0.trim()
+        abs1      = @_rewrite_arpabet_s abs0.toLowerCase()
+        ipa       = @ipa_from_abs1    abs1
+        xsampa    = @xsampa_from_ipa  ipa
+        insert.run { word, abs0, abs1, xsampa, ipa, }
       return null
     return null
 
@@ -272,15 +274,15 @@ class @Cmud
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
-  # ipa_from_arpabet_s_1: ( arpabet_s ) ->
-  #   R = arpabet_s.replace /\b[\S]+?\b/g, ( match ) =>
+  # ipa_from_arpabet_s_1: ( abs0 ) ->
+  #   R = abs0.replace /\b[\S]+?\b/g, ( match ) =>
   #     match = match.replace /\d+$/, ''
   #     return @ipa_by_ab2[ match ] ? '?'
   #   return R.replace /\s/g, ''
 
   #---------------------------------------------------------------------------------------------------------
-  ipa_from_arpabet_s: ( arpabet_s ) ->
-    R = arpabet_s.split '\x20'
+  ipa_from_abs1: ( abs0 ) ->
+    R = abs0.split '\x20'
     return ( @ipa_by_ab2[ ( phone.replace /\d+$/, '' ) ] ? '█' for phone in R ).join ''
 
   #---------------------------------------------------------------------------------------------------------
@@ -288,5 +290,11 @@ class @Cmud
     R = Array.from ipa
     return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
 
+  #---------------------------------------------------------------------------------------------------------
+  _rewrite_arpabet_s: ( abs0 ) ->
+    R = abs0
+    R = R.replace /\bah0\b/g, 'ax0'
+    R = R.replace /\ber(\d?)\b/g, 'ex$1 r'
+    return R
 
 
