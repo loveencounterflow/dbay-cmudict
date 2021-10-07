@@ -8,7 +8,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [𓆤DBay 𓅗CMUdict](#%F0%93%86%A4dbay-%F0%93%85%97cmudict)
-  - [Data Source](#data-source)
+  - [Data Sources](#data-sources)
   - [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -16,9 +16,25 @@
 
 # 𓆤DBay 𓅗CMUdict
 
-## Data Source
+The 𓆤DBay 𓅗CMUdict takes the [ARPAbet](https://en.wikipedia.org/wiki/ARPABET) phonetic notations for the
+126,689 (non-genitive) entries of [The CMU Pronouncing Dictionary
+(CMUdict)](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) and rewrites them in a number of ways:
 
-https://github.com/Alexir/CMUdict
+* whereas the CMUdict originally used upper case [ARPAbet](https://en.wikipedia.org/wiki/ARPABET) notation,
+  we convert those into lower case and correct a few details.
+* From the rewritten ARPAbet, we derive a notation using the [International Phonetic Alphabet
+  (IPA)](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet), which is much more common and more
+  readable. Since the CMUdict dataset does not contain any indicators for syllabification, we indicate
+  stress by underlining stressed vowels with double and single lines for primary and secondary stress.
+* By substituting IPA symbols with those of the [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
+  transscription scheme, we get a notation that should be easier to type on most keyboards.
+
+## Data Sources
+
+* [CMUdict](http://www.speech.cs.cmu.edu/cgi-bin/cmudict)
+* https://github.com/Alexir/CMUdict
+* [ARPAbet](https://en.wikipedia.org/wiki/ARPABET)
+* [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
 
 ## To Do
 
@@ -41,6 +57,6 @@ https://github.com/Alexir/CMUdict
     ```
 
   * therefore, rewrite `arpabet_s` `er(\d)` as `ah$1 r`
-
+* **[–]** list all changes made to the original notation.
 
 
