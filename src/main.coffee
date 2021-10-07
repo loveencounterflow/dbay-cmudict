@@ -194,7 +194,7 @@ class @Cmud
       for line from guy.fs.walk_lines @cfg.source_path
         continue if line.startsWith ';;;'
         line                  = line.trimEnd()
-        [ word, abs0,  ] = line.split '\x20\x20'
+        [ word, abs0,  ]      = line.split '\x20\x20'
         word                  = word.trim()
         continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
         continue if ( word.match /'S\(\d\)$/ )?
@@ -203,10 +203,11 @@ class @Cmud
           continue
         #...................................................................................................
         count++
+        # break if count > 1000
         word      = word.toLowerCase()
         abs0      = abs0.trim()
         abs1      = @_rewrite_arpabet_s abs0.toLowerCase()
-        ipa       = @ipa_from_abs1    abs1
+        ipa       = @ipa_from_abs1 abs1
         xsampa    = @xsampa_from_ipa  ipa
         insert.run { word, abs0, abs1, xsampa, ipa, }
       return null
@@ -288,9 +289,23 @@ class @Cmud
   #   return R.replace /\s/g, ''
 
   #---------------------------------------------------------------------------------------------------------
-  ipa_from_abs1: ( abs0 ) ->
-    R = abs0.split '\x20'
-    return ( @ipa_by_ab2[ ( phone.replace /\d+$/, '' ) ] ? '█' for phone in R ).join ''
+  ipa_from_abs1: ( abs1 ) ->
+    R = []
+    for phone in abs1.split '\x20'
+      stress  = null
+      if ( match = phone.match /^(?<base>\D+)(?<level>\d*)$/ )?
+        { base
+          level } = match.groups
+        mark      = { '': '', '0': '', '1': '̳', '2': '̲', }[ level ]
+        # mark      = { '': '', '0': '', '1': '̅', '2': '̲', }[ level ]
+        for letter in Array.from ( @ipa_by_ab2[ base ] ? '█' )
+          R.push letter + mark
+      else
+        R.push @ipa_by_ab2[ phone ] ? '█'
+      # debug '^444^', { mark, base, }
+      # return mark + base
+      # return base
+    return R.join ''
 
   #---------------------------------------------------------------------------------------------------------
   xsampa_from_ipa: ( ipa ) ->
@@ -300,7 +315,7 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   _rewrite_arpabet_s: ( abs0 ) ->
     R = abs0
-    R = R.replace /\bah0\b/g, 'ax0'
+    R = R.replace /\bah([02])\b/g, 'ax$1'
     R = R.replace /\ber(\d?)\b/g, 'ex$1 r'
     return R
 
