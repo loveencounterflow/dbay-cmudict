@@ -177,16 +177,12 @@ class @Cmud
   _create_sql_functions: ->
     { prefix
       schema } = @cfg
-    # #.......................................................................................................
-    # @dba.create_function
-    #   name:           "#{prefix}_tags_from_id",
-    #   deterministic:  true,
-    #   varargs:        false,
-    #   call:           ( id ) =>
-    #     fallbacks = @get_filtered_fallbacks()
-    #     tagchain  = @tagchain_from_id { id, }
-    #     tags      = @tags_from_tagchain { tagchain, }
-    #     return JSON.stringify { fallbacks..., tags..., }
+    # #-------------------------------------------------------------------------------------------------------
+    # @db.create_function
+    #   name:           prefix + 'ipa_from_abs1'
+    #   deterministic:  true
+    #   varargs:        false
+    #   call:           ( abs1 ) => @ipa_from_abs1( abs1 )
     #.......................................................................................................
     return null
 
