@@ -27,7 +27,7 @@ The 𓆤DBay 𓅗CMUdict takes the [ARPAbet](https://en.wikipedia.org/wiki/ARPAB
   readable. Since the CMUdict dataset does not contain any indicators for syllabification, we indicate
   stress by underlining stressed vowels with double and single lines for primary and secondary stress.
 * By substituting IPA symbols with those of the [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
-  transscription scheme, we get a notation that should be easier to type on most keyboards.
+  transliteration scheme, we get a notation that should be easier to type on most keyboards.
 
 ## Data Sources
 
@@ -58,5 +58,12 @@ The 𓆤DBay 𓅗CMUdict takes the [ARPAbet](https://en.wikipedia.org/wiki/ARPAB
 
   * therefore, rewrite `arpabet_s` `er(\d)` as `ah$1 r`
 * **[–]** list all changes made to the original notation.
+* **[–]** apply lower-casing and replacements right when reading original source
+* **[–]** keep all transliterations in single table `trlats` so adding new schemes can be done w/out
+  migration.
+* **[–]** keep transliterations with vs transliterations without stree marking in two separate tables? Or
+  better use a flag field.
+* **[–]** remove / translate (into a field value) counter that indicates variants.
+
 
 
