@@ -175,13 +175,6 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _populate_db: ->
-    # # https://avi.im/blag/2021/fast-sqlite-inserts/
-    # @db SQL"""
-    #   PRAGMA journal_mode = OFF;
-    #   PRAGMA synchronous = 0;
-    #   PRAGMA cache_size = 1000000;
-    #   PRAGMA locking_mode = EXCLUSIVE;
-    #   PRAGMA temp_store = MEMORY;"""
     @_populate_arpabet_to_ipa()
     @_populate_xsampa_to_ipa()
     @_populate_entries()
