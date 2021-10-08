@@ -213,7 +213,7 @@ class @Cmud
   _populate_arpabet_to_ipa: ->
     @_truncate_abipa()
     line_nr     = 0
-    ipa_by_ab2  = {}
+    ipa_by_ab2  = {} ### #cache ###
     insert      = @db.prepare @sql.insert_abipa
     @db =>
       for line from guy.fs.walk_lines @cfg.abipa_path
@@ -232,11 +232,11 @@ class @Cmud
         ab1               = ab1.toLowerCase() if ab1
         ab2               = ab2.toLowerCase()
         example           = example.replace /\x20/g, ''
-        ipa_by_ab2[ ab2 ] = ipa
+        ipa_by_ab2[ ab2 ] = ipa ### #cache ###
         insert.run { cv, ab1, ab2, ipa, example, }
       return null
-    ipa_by_ab2 = guy.lft.freeze ipa_by_ab2
-    guy.props.def @, 'ipa_by_ab2', { enumerable: false, value: ipa_by_ab2, }
+    ipa_by_ab2 = guy.lft.freeze ipa_by_ab2 ### #cache ###
+    guy.props.def @, 'ipa_by_ab2', { enumerable: false, value: ipa_by_ab2, } ### #cache ###
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -249,7 +249,7 @@ class @Cmud
   _populate_xsampa_to_ipa: ->
     @_truncate_xsipa()
     line_nr     = 0
-    xs_by_ipa   = {}
+    xs_by_ipa   = {} ### #cache ###
     insert      = @db.prepare @sql.insert_xsipa
     @db =>
       for line from guy.fs.walk_lines @cfg.xsipa_path
@@ -268,11 +268,11 @@ class @Cmud
         example          ?= "(no example)"
         example           = @_undoublequote example
         example           = example.replace /\\"/g, '"'
-        xs_by_ipa[ ipa ]  = xs
+        xs_by_ipa[ ipa ]  = xs ### #cache ###
         insert.run { description, xs, ipa, example, }
       return null
-    xs_by_ipa = guy.lft.freeze xs_by_ipa
-    guy.props.def @, 'xs_by_ipa', { enumerable: false, value: xs_by_ipa, }
+    xs_by_ipa = guy.lft.freeze xs_by_ipa ### #cache ###
+    guy.props.def @, 'xs_by_ipa', { enumerable: false, value: xs_by_ipa, } ### #cache ###
     return null
 
   #=========================================================================================================
