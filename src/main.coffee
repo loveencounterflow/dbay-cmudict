@@ -84,6 +84,8 @@ class @Cmud
       drop index if exists #{schema}.entries_abs1_idx;
       drop index if exists #{schema}.entries_xsampa_idx;
       drop index if exists #{schema}.entries_ipa_idx;
+      drop table if exists #{schema}.trlats;
+      drop table if exists #{schema}.abs_phones;
       drop table if exists #{schema}.entries;
       drop table if exists #{schema}.abipa;
       drop table if exists #{schema}.xsipa;
@@ -118,6 +120,32 @@ class @Cmud
         xs          text    not null primary key,
         ipa         text    not null,
         example     text    not null );
+      -- ...................................................................................................
+      create table #{schema}.abs_phones (
+          word        text    not null,
+          lnr         integer not null,
+          rnr         integer not null,
+          abs0_phone  text    not null,
+          abs1_phone  text    not null,
+          stress      integer,
+        primary key ( word, lnr ) );
+      -- ...................................................................................................
+      -- **Note** Table trlats collects all transliterations into a single table. This has been done for
+      -- extensibility so you don't have to modify the DB's structure just to add a transliteration scheme.
+      create table #{schema}.trlats ( -- trlats: transliterations
+          ipa         text    not null,
+          nick        text    not null, -- code for transliterations
+          value       text    not null,
+        primary key ( ipa, nick ) );
+      -- -- ...................................................................................................
+      -- create view #{schema}.abs_phones as select
+      --     r1.word   as word,
+      --     r2.lnr    as lnr,
+      --     r2.rnr    as rnr,
+      --     r2.part   as abs1_phone
+      --   from
+      --     entries                           as r1,
+      --     std_str_split_re( r1.abs1, '\s' ) as r2;
       """
     return null
 
@@ -139,6 +167,9 @@ class @Cmud
       insert_xsipa: SQL"""
         insert into #{schema}.xsipa ( description, xs, ipa, example )
           values ( $description, $xs, $ipa, $example );"""
+      insert_abs_phones: SQL"""
+        insert into #{schema}.abs_phones ( word, lnr, rnr, abs0_phone, abs1_phone, stress )
+          values ( $word, $lnr, $rnr, $abs0_phone, $abs1_phone, $stress );"""
     guy.props.def @, 'sql', { enumerable: false, value: sql, }
     return null
 
