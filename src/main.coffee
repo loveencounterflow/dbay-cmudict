@@ -88,6 +88,8 @@ class @Cmud
       drop table if exists #{schema}.abipa;
       drop table if exists #{schema}.xsipa;
       -- ...................................................................................................
+      vacuum #{schema};
+      -- ...................................................................................................
       create table #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
