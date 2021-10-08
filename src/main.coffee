@@ -292,8 +292,8 @@ class @Cmud
       if ( match = phone.match /^(?<base>\D+)(?<level>\d*)$/ )?
         { base
           level } = match.groups
-        mark      = { '': '', '0': '', '1': '̳', '2': '̲', }[ level ]
-        # mark      = { '': '', '0': '', '1': '̅', '2': '̲', }[ level ]
+        mark      = { '': '', '0': '', '1': '̲', '2': '̤', }[ level ]
+        # mark      = { '': '', '0': '', '1': '̅', '2': '̤', }[ level ]
         for letter in Array.from ( @ipa_by_ab2[ base ] ? '█' )
           R.push letter + mark
       else
@@ -305,14 +305,16 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   xsampa_from_ipa: ( ipa ) ->
-    R = ( d for d in ( Array.from ipa ) when d not in [ '̳', '̲', ] )
+    R = ( d for d in ( Array.from ipa ) when d not in [ '̲', '̤', ] )
     return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
 
   #---------------------------------------------------------------------------------------------------------
   _rewrite_arpabet_s: ( abs0 ) ->
     R = abs0
-    R = R.replace /\bah([02])\b/g, 'ax$1'
-    R = R.replace /\ber(\d?)\b/g, 'ex$1 r'
+    R = R.replace /\bah([02])\b/g,  'ax$1'
+    R = R.replace /\ber0\b/g,       'ax0 r'
+    R = R.replace /\ber1\b/g,       'ex1 r'
+    R = R.replace /\ber2\b/g,       'ex2 r'
     return R
 
 
