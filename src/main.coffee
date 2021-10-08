@@ -32,14 +32,15 @@ class @Cmud
     defaults:
       #.....................................................................................................
       constructor_cfg:
-        db:           null
-        prefix:       'cmud_'
-        schema:       'cmud'
-        path:         PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
-        source_path:  PATH.resolve PATH.join __dirname, '../cmudict-0.7b'
-        abipa_path:   PATH.resolve PATH.join __dirname, '../arpabet-to-ipa.tsv'
-        xsipa_path:   PATH.resolve PATH.join __dirname, '../xsampa-to-ipa.tsv'
-        create:       false
+        db:               null
+        prefix:           'cmud_'
+        schema:           'cmud'
+        path:             PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
+        source_path:      PATH.resolve PATH.join __dirname, '../cmudict-0.7b'
+        abipa_path:       PATH.resolve PATH.join __dirname, '../arpabet-to-ipa.tsv'
+        xsipa_path:       PATH.resolve PATH.join __dirname, '../xsampa-to-ipa.tsv'
+        create:           false
+        max_entry_count:  Infinity
 
   #---------------------------------------------------------------------------------------------------------
   @cast_constructor_cfg: ( me, cfg = null ) ->
@@ -203,7 +204,9 @@ class @Cmud
           continue
         #...................................................................................................
         count++
-        # break if count > 1000
+        if count > @cfg.max_entry_count
+          warn '^dbay-cmudict/main@1^', "shortcutting at #{@cfg.max_entry_count} entries"
+          break
         word      = word.toLowerCase()
         abs0      = abs0.trim()
         abs1      = @_rewrite_arpabet_s abs0.toLowerCase()

@@ -23,9 +23,13 @@ dbay_types                = require 'dbay/lib/types'
 
 #-----------------------------------------------------------------------------------------------------------
 @declare 'constructor_cfg', tests:
-  "@isa.object x":                            ( x ) -> @isa.object x
-  "@isa.nonempty_text x.prefix":              ( x ) -> @isa.nonempty_text x.prefix
-  "@isa.nonempty_text x.path":                ( x ) -> @isa.nonempty_text x.path
-  "dbay_types.dbay_schema x.schema":          ( x ) -> dbay_types.isa.dbay_schema x.schema
-  "@isa.boolean x.create":                    ( x ) -> @isa.boolean x.create
+  "@isa.object x":                              ( x ) -> @isa.object x
+  "@isa.nonempty_text x.prefix":                ( x ) -> @isa.nonempty_text x.prefix
+  "@isa.nonempty_text x.path":                  ( x ) -> @isa.nonempty_text x.path
+  "dbay_types.dbay_schema x.schema":            ( x ) -> dbay_types.isa.dbay_schema x.schema
+  "@isa.boolean x.create":                      ( x ) -> @isa.boolean x.create
+  "@x.max_entry_count is a float or +Infinity": ( x ) ->
+    return true if x.max_entry_count is +Infinity
+    return @isa.float x.max_entry_count
+    return false
 
