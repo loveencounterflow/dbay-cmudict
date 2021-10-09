@@ -29,6 +29,7 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   @C: guy.lft.freeze
+    replacement:  '█'
     defaults:
       #.....................................................................................................
       constructor_cfg:
@@ -62,8 +63,9 @@ class @Cmud
     me.cfg        = @cast_constructor_cfg me
     me.types.validate.constructor_cfg me.cfg
     { db, }       = guy.obj.pluck_with_fallback me.cfg, null, 'db'
-    guy.props.def me, 'db', { enumerable: false, value: db, }
     me.cfg        = guy.lft.freeze guy.obj.omit_nullish me.cfg
+    guy.props.def me, 'db',     { enumerable: false, value: db, }
+    guy.props.def me, 'cache',  { enumerable: false, value: {}, }
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -80,63 +82,44 @@ class @Cmud
       schema } = @cfg
     @db.execute SQL"""
       drop index if exists #{schema}.entries_word_idx;
-      drop index if exists #{schema}.entries_abs0_idx;
-      drop index if exists #{schema}.entries_abs1_idx;
-      drop index if exists #{schema}.entries_xsampa_idx;
-      drop index if exists #{schema}.entries_ipa_idx;
-      drop table if exists #{schema}.trlats;
+      drop table if exists #{schema}.trlits;
+      drop table if exists #{schema}.trlit_nicks;
       drop table if exists #{schema}.abs_phones;
       drop table if exists #{schema}.entries;
-      drop table if exists #{schema}.abipa;
-      drop table if exists #{schema}.xsipa;
       -- ...................................................................................................
       vacuum #{schema};
       -- ...................................................................................................
       create table #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
-          abs0      text    not null,
-          abs1      text    not null,
-          xsampa    text    not null,
-          ipa       text    not null );
+          ipa_raw   text    not null );
       create index #{schema}.entries_word_idx
         on entries ( word );
-      create index #{schema}.entries_abs0_idx
-        on entries ( abs0 );
-      create index #{schema}.entries_abs1_idx
-        on entries ( abs1 );
-      create index #{schema}.entries_xsampa_idx
-        on entries ( xsampa );
-      create index #{schema}.entries_ipa_idx
-        on entries ( ipa );
-      create table #{schema}.abipa (
-        cv          text    not null,
-        ab1         text,
-        ab2         text    not null primary key,
-        ipa         text    not null,
-        example     text    not null );
-      create table #{schema}.xsipa (
-        description text,
-        xs          text    not null primary key,
-        ipa         text    not null,
-        example     text    not null );
+      -- create index #{schema}.entries_ipa_idx
+      --   on entries ( ipa );
+      -- -- ...................................................................................................
+      -- create table #{schema}.abs_phones (
+      --     word        text    not null,
+      --     lnr         integer not null,
+      --     rnr         integer not null,
+      --     abs0_phone  text    not null,
+      --     abs1_phone  text    not null,
+      --     stress      integer,
+      --   primary key ( word, lnr ) );
       -- ...................................................................................................
-      create table #{schema}.abs_phones (
-          word        text    not null,
-          lnr         integer not null,
-          rnr         integer not null,
-          abs0_phone  text    not null,
-          abs1_phone  text    not null,
-          stress      integer,
-        primary key ( word, lnr ) );
-      -- ...................................................................................................
-      -- **Note** Table trlats collects all transliterations into a single table. This has been done for
+      -- **Note** Table trlits collects all transliterations into a single table. This has been done for
       -- extensibility so you don't have to modify the DB's structure just to add a transliteration scheme.
-      create table #{schema}.trlats ( -- trlats: transliterations
+      create table #{schema}.trlits ( -- trlits: transliterations
           ipa         text    not null,
           nick        text    not null, -- code for transliterations
-          value       text    not null,
+          trlit       text    not null,
+          example     text,
         primary key ( ipa, nick ) );
+      create table #{schema}.trlit_nicks (
+          nick        text    not null,
+          name        text    not null,
+          comment     text,
+        primary key ( nick ) );
       -- -- ...................................................................................................
       -- create view #{schema}.abs_phones as select
       --     r1.word   as word,
@@ -156,20 +139,19 @@ class @Cmud
     sql         =
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
       truncate_entries:     SQL"delete from #{schema}.entries;"
-      truncate_abipa:       SQL"delete from #{schema}.abipa;"
-      truncate_xsipa:       SQL"delete from #{schema}.xsipa;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, abs0, abs1, xsampa, ipa )
-          values ( $word, $abs0, $abs1, $xsampa, $ipa );"""
-      insert_abipa: SQL"""
-        insert into #{schema}.abipa ( cv, ab1, ab2, ipa, example )
-          values ( $cv, $ab1, $ab2, $ipa, $example );"""
-      insert_xsipa: SQL"""
-        insert into #{schema}.xsipa ( description, xs, ipa, example )
-          values ( $description, $xs, $ipa, $example );"""
-      insert_abs_phones: SQL"""
-        insert into #{schema}.abs_phones ( word, lnr, rnr, abs0_phone, abs1_phone, stress )
-          values ( $word, $lnr, $rnr, $abs0_phone, $abs1_phone, $stress );"""
+        insert into #{schema}.entries ( word, ipa_raw )
+          values ( $word, $ipa_raw );"""
+      insert_trlit: SQL"""
+        insert into #{schema}.trlits ( ipa, nick, trlit, example )
+          values ( $ipa, $nick, $trlit, $example );"""
+      delete_arpabet_trlits: SQL"""
+        delete from #{schema}.trlits
+          where nick in ( 'ab1', 'ab2' );
+        """
+      # insert_abs_phones: SQL"""
+      #   insert into #{schema}.abs_phones ( word, lnr, rnr, abs0_phone, abs1_phone, stress )
+      #     values ( $word, $lnr, $rnr, $abs0_phone, $abs1_phone, $stress );"""
     guy.props.def @, 'sql', { enumerable: false, value: sql, }
     return null
 
@@ -187,10 +169,9 @@ class @Cmud
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _get_db_object_count: -> @db.single_value @sql.get_db_object_count
-  _truncate_entries:    -> @db @sql.truncate_entries
-  _truncate_abipa:      -> @db @sql.truncate_abipa
-  _truncate_xsipa:      -> @db @sql.truncate_xsipa
+  _get_db_object_count:   -> @db.single_value @sql.get_db_object_count
+  _truncate_entries:      -> @db @sql.truncate_entries
+  _delete_arpabet_trlits: -> @db @sql.delete_arpabet_trlits
 
   #---------------------------------------------------------------------------------------------------------
   _open_cmu_db: ->
@@ -204,24 +185,24 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _populate_db: ->
-    @_populate_arpabet_to_ipa()
-    @_populate_xsampa_to_ipa()
+    @_populate_arpabet_trlits()
+    # @_populate_xsampa_to_ipa()
     @_populate_entries()
 
   #---------------------------------------------------------------------------------------------------------
   _populate_entries: ->
     count = 0
     @_truncate_entries()
-    insert = @db.prepare @sql.insert_entry
+    insert_entry = @db.prepare @sql.insert_entry
     @db =>
       for line from guy.fs.walk_lines @cfg.source_path
         continue if line.startsWith ';;;'
         line                  = line.trimEnd()
-        [ word, abs0,  ]      = line.split '\x20\x20'
+        [ word, ab, ]         = line.split '\x20\x20'
         word                  = word.trim()
         continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
         continue if ( word.match /'S\(\d\)$/ )?
-        unless word? and word.length > 0 and abs0? and abs0.length > 0
+        if ( not word? ) or ( word.length is 0 ) or ( not ab? ) or ( ab.length is 0 )
           warn '^4443^', count, ( rpr line )
           continue
         #...................................................................................................
@@ -230,20 +211,22 @@ class @Cmud
           warn '^dbay-cmudict/main@1^', "shortcutting at #{@cfg.max_entry_count} entries"
           break
         word      = word.toLowerCase()
-        abs0      = abs0.trim()
-        abs1      = @_rewrite_arpabet_s abs0.toLowerCase()
-        ipa       = @ipa_from_abs1 abs1
-        xsampa    = @xsampa_from_ipa  ipa
-        insert.run { word, abs0, abs1, xsampa, ipa, }
+        ab        = ab.trim().toLowerCase()
+        ipa_raw   = @ipa_raw_from_arpabet2 ab
+        # abs1      = @_rewrite_arpabet_s ab.toLowerCase()
+        # ipa       = @ipa_from_abs1 abs1
+        # xsampa    = @xsampa_from_ipa  ipa
+        # debug '^4345^', { word, ipa_raw, }
+        insert_entry.run { word, ipa_raw, }
       return null
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _populate_arpabet_to_ipa: ->
-    @_truncate_abipa()
-    line_nr     = 0
-    ipa_by_ab2  = {} ### #cache ###
-    insert      = @db.prepare @sql.insert_abipa
+  _populate_arpabet_trlits: ->
+    @_delete_arpabet_trlits()
+    line_nr       = 0
+    insert_trlit  = @db.prepare @sql.insert_trlit
+    ### TAINT insert into trlit registry ###
     @db =>
       for line from guy.fs.walk_lines @cfg.abipa_path
         line_nr++
@@ -261,11 +244,9 @@ class @Cmud
         ab1               = ab1.toLowerCase() if ab1
         ab2               = ab2.toLowerCase()
         example           = example.replace /\x20/g, ''
-        ipa_by_ab2[ ab2 ] = ipa ### #cache ###
-        insert.run { cv, ab1, ab2, ipa, example, }
+        insert_trlit.run { ipa, nick: 'ab1', trlit: ab1, example, } if ab1?
+        insert_trlit.run { ipa, nick: 'ab2', trlit: ab2, example, }
       return null
-    ipa_by_ab2 = guy.lft.freeze ipa_by_ab2 ### #cache ###
-    guy.props.def @, 'ipa_by_ab2', { enumerable: false, value: ipa_by_ab2, } ### #cache ###
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -314,28 +295,38 @@ class @Cmud
   #   return R.replace /\s/g, ''
 
   #---------------------------------------------------------------------------------------------------------
-  ipa_from_abs1: ( abs1 ) ->
-    R = []
-    for phone in abs1.split '\x20'
+  _build_cache_ipa_raw_from_arpabet2: ->
+    R = {}
+    for row from @db SQL"select * from #{@cfg.schema}.trlits where nick = 'ab2';"
+      R[ row.trlit ] = row.ipa
+    debug '^334^', R
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  ipa_raw_from_arpabet2: ( ab ) ->
+    cache       = ( @cache.ipa_raw_from_arpabet2 ?= @_build_cache_ipa_raw_from_arpabet2() )
+    replacement = @constructor.C.replacement
+    R           = []
+    for phone in ab.split /\x20+/
       stress  = null
       if ( match = phone.match /^(?<base>\D+)(?<level>\d*)$/ )?
         { base
           level } = match.groups
         mark      = { '': '', '0': '', '1': '̲', '2': '̤', }[ level ]
         # mark      = { '': '', '0': '', '1': '̅', '2': '̤', }[ level ]
-        for letter in Array.from ( @ipa_by_ab2[ base ] ? '█' )
+        for letter in Array.from ( cache[ base ] ? replacement )
           R.push letter + mark
       else
-        R.push @ipa_by_ab2[ phone ] ? '█'
+        R.push cache[ phone ] ? replacement
       # debug '^444^', { mark, base, }
       # return mark + base
       # return base
-    return R.join ''
+    return R.join ' '
 
-  #---------------------------------------------------------------------------------------------------------
-  xsampa_from_ipa: ( ipa ) ->
-    R = ( d for d in ( Array.from ipa ) when d not in [ '̲', '̤', ] )
-    return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
+  # #---------------------------------------------------------------------------------------------------------
+  # xsampa_from_ipa: ( ipa ) ->
+  #   R = ( d for d in ( Array.from ipa ) when d not in [ '̲', '̤', ] )
+  #   return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
 
   #---------------------------------------------------------------------------------------------------------
   _rewrite_arpabet_s: ( abs0 ) ->
