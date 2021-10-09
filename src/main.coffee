@@ -92,7 +92,8 @@ class @Cmud
       create table #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
-          ipa_raw   text    not null );
+          ipa_raw   text    not null,
+          ipa       text    not null );
       create index #{schema}.entries_word_idx
         on entries ( word );
       -- create index #{schema}.entries_ipa_idx
@@ -140,8 +141,8 @@ class @Cmud
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
       truncate_entries:     SQL"delete from #{schema}.entries;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, ipa_raw )
-          values ( $word, $ipa_raw );"""
+        insert into #{schema}.entries ( word, ipa_raw, ipa )
+          values ( $word, $ipa_raw, $ipa );"""
       insert_trlit: SQL"""
         insert into #{schema}.trlits ( ipa, nick, trlit, example )
           values ( $ipa, $nick, $trlit, $example );"""
@@ -211,13 +212,9 @@ class @Cmud
           warn '^dbay-cmudict/main@1^', "shortcutting at #{@cfg.max_entry_count} entries"
           break
         word      = word.toLowerCase()
-        ab        = ab.trim().toLowerCase()
-        ipa_raw   = @ipa_raw_from_arpabet2 ab
-        # abs1      = @_rewrite_arpabet_s ab.toLowerCase()
-        # ipa       = @ipa_from_abs1 abs1
-        # xsampa    = @xsampa_from_ipa  ipa
-        # debug '^4345^', { word, ipa_raw, }
-        insert_entry.run { word, ipa_raw, }
+        ipa_raw   = @ipa_raw_from_arpabet2  ab
+        ipa       = @ipa_from_ipa_raw       ipa_raw
+        insert_entry.run { word, ipa_raw, ipa, }
       return null
     return null
 
@@ -307,20 +304,16 @@ class @Cmud
     cache       = ( @cache.ipa_raw_from_arpabet2 ?= @_build_cache_ipa_raw_from_arpabet2() )
     replacement = @constructor.C.replacement
     R           = []
+    ab          = ab.trim().toLowerCase()
     for phone in ab.split /\x20+/
       stress  = null
       if ( match = phone.match /^(?<base>\D+)(?<level>\d*)$/ )?
         { base
           level } = match.groups
-        mark      = { '': '', '0': '', '1': '̲', '2': '̤', }[ level ]
-        # mark      = { '': '', '0': '', '1': '̅', '2': '̤', }[ level ]
         for letter in Array.from ( cache[ base ] ? replacement )
-          R.push letter + mark
+          R.push letter + level
       else
         R.push cache[ phone ] ? replacement
-      # debug '^444^', { mark, base, }
-      # return mark + base
-      # return base
     return R.join ' '
 
   # #---------------------------------------------------------------------------------------------------------
@@ -329,12 +322,16 @@ class @Cmud
   #   return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
 
   #---------------------------------------------------------------------------------------------------------
-  _rewrite_arpabet_s: ( abs0 ) ->
-    R = abs0
-    R = R.replace /\bah([02])\b/g,  'ax$1'
-    R = R.replace /\ber0\b/g,       'ax0 r'
-    R = R.replace /\ber1\b/g,       'ex1 r'
-    R = R.replace /\ber2\b/g,       'ex2 r'
+  ipa_from_ipa_raw: ( ipa_raw ) ->
+    R = ipa_raw
+    R = R.replace /\bʌ([02])\b/g,   'ə$1'
+    R = R.replace /\bɝ0\b/g,        'ə0 r'
+    R = R.replace /\bɝ1\b/g,        'ɜ1 r'
+    R = R.replace /\bɝ2\b/g,        'ɜ2 r'
+    R = R.replace /\x20/g,          ''
+    R = R.replace /0/g,             ''
+    R = R.replace /1/g,             '̲'
+    R = R.replace /2/g,             '̤'
     return R
 
 
