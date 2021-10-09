@@ -296,7 +296,6 @@ class @Cmud
     R = {}
     for row from @db SQL"select * from #{@cfg.schema}.trlits where nick = 'ab2';"
       R[ row.trlit ] = row.ipa
-    debug '^334^', R
     return R
 
   #---------------------------------------------------------------------------------------------------------
@@ -324,11 +323,12 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   ipa_from_ipa_raw: ( ipa_raw ) ->
     R = ipa_raw
-    R = R.replace /\bʌ([02])\b/g,   'ə$1'
-    R = R.replace /\bɝ0\b/g,        'ə0 r'
-    R = R.replace /\bɝ1\b/g,        'ɜ1 r'
-    R = R.replace /\bɝ2\b/g,        'ɜ2 r'
-    R = R.replace /\x20/g,          ''
+    R = ',' + ( R.replace /\x20+/g, ',' ) + ','
+    R = R.replace /,ʌ([02]),/g,     ',ə$1,'
+    R = R.replace /,ɝ0,/g,          ',ə0,r,'
+    R = R.replace /,ɝ1,/g,          ',ɜ1,r,'
+    R = R.replace /,ɝ2,/g,          ',ɜ2,r,'
+    R = R.replace /,/g,             ''
     R = R.replace /0/g,             ''
     R = R.replace /1/g,             '̲'
     R = R.replace /2/g,             '̤'
