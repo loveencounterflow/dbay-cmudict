@@ -24,6 +24,7 @@ SQL                       = String.raw
 guy                       = require 'guy'
 home                      = PATH.resolve PATH.join __dirname, '..'
 data_path                 = PATH.join home, 'data'
+BRITFONE                  = require 'britfone'
 
 #===========================================================================================================
 class @Cmud
@@ -41,6 +42,9 @@ class @Cmud
         paths:
           cmu:            PATH.join data_path, 'cmudict-0.7b'
           beep:           PATH.join data_path, 'beep/beep-1.0'
+          bf_expansions:  BRITFONE.expansions
+          bf_main:        BRITFONE.main
+          bf_symbols:     BRITFONE.symbols
           spellings:      PATH.join data_path, 'beep/case.txt'
           abipa:          PATH.join data_path, 'arpabet-to-ipa.tsv'
           xsipa:          PATH.join data_path, 'xsampa-to-ipa.tsv'
@@ -200,6 +204,7 @@ class @Cmud
     @_cache_spellings()
     @_populate_cmu_entries()
     @_populate_beep_entries()
+    @_populate_bf_entries()
 
   #---------------------------------------------------------------------------------------------------------
   _populate_cmu_entries: ->
@@ -225,7 +230,7 @@ class @Cmud
         word      = word.toLowerCase()
         word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
         ipa_raw   = @ipa_raw_from_arpabet2  ab
-        ipa       = @ipa_from_ipa_raw       ipa_raw
+        ipa       = @ipa_from_cmu_ipa_raw       ipa_raw
         insert_entry.run { word, source, ipa_raw, ipa, }
       return null
     return null
@@ -257,8 +262,38 @@ class @Cmud
         word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
         word      = word.replace /_/g, '\x20'
         ipa_raw   = @ipa_raw_from_arpabet2  ab
-        # ipa       = @ipa_from_ipa_raw       ipa_raw
-        ipa       = ipa_raw.replace /\x20+/g, ''
+        ipa       = @ipa_from_beep_ipa_raw  ipa_raw
+        insert_entry.run { word, source, ipa_raw, ipa, }
+      return null
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _populate_bf_entries: ->
+    count         = 0
+    insert_entry  = @db.prepare @sql.insert_entry
+    source        = 'bf'
+    @_truncate_entries source
+    @db @sql.upsert_source_nick, { nick: source, name: "Britfone", comment: "v3.0.1", }
+    @db =>
+      for line from guy.fs.walk_lines @cfg.paths.bf_main
+        continue if line.startsWith '#'
+        line = line.trim()
+        continue if line.length is 0
+        continue unless ( match = line.match /(?<word>[^,]+),\s*(?<ipa_raw>.*)$/ )?
+        { word
+          ipa_raw } = match.groups
+        if ( word.length is 0 ) or ( ipa_raw.length is 0 )
+          warn '^4443^', count, ( rpr line )
+          continue
+        #...................................................................................................
+        count++
+        if count > @cfg.max_entry_count
+          warn '^dbay-cmudict/main@2^', "shortcutting at #{@cfg.max_entry_count} entries"
+          break
+        word      = word.toLowerCase()
+        word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
+        # word      = word.replace /_/g, '\x20'
+        ipa       = @ipa_from_britfone_ipa_raw  ipa_raw
         insert_entry.run { word, source, ipa_raw, ipa, }
       return null
     return null
@@ -353,13 +388,6 @@ class @Cmud
   #=========================================================================================================
   #
   #---------------------------------------------------------------------------------------------------------
-  # ipa_from_arpabet_s_1: ( abs0 ) ->
-  #   R = abs0.replace /\b[\S]+?\b/g, ( match ) =>
-  #     match = match.replace /\d+$/, ''
-  #     return @ipa_by_ab2[ match ] ? '?'
-  #   return R.replace /\s/g, ''
-
-  #---------------------------------------------------------------------------------------------------------
   _build_cache_ipa_raw_from_arpabet2: ->
     R = {}
     for row from @db SQL"select * from #{@cfg.schema}.trlits where nick = 'ab2';"
@@ -383,13 +411,8 @@ class @Cmud
         R.push cache[ phone ] ? replacement
     return R.join ' '
 
-  # #---------------------------------------------------------------------------------------------------------
-  # xsampa_from_ipa: ( ipa ) ->
-  #   R = ( d for d in ( Array.from ipa ) when d not in [ '̲', '̤', ] )
-  #   return ( @xs_by_ipa[ letter ] ? '█' for letter, idx in R ).join ''
-
   #---------------------------------------------------------------------------------------------------------
-  ipa_from_ipa_raw: ( ipa_raw ) ->
+  ipa_from_cmu_ipa_raw: ( ipa_raw ) ->
     R = ipa_raw
     R = ',' + ( R.replace /\x20+/g, ',' ) + ','
     R = R.replace /,ʌ([02]),/g,     ',ə$1,'
@@ -400,6 +423,22 @@ class @Cmud
     R = R.replace /0/g,             ''
     R = R.replace /1/g,             '̲'
     R = R.replace /2/g,             '̤'
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  ipa_from_beep_ipa_raw: ( ipa_raw ) ->
+    R = ipa_raw
+    R = ',' + ( R.replace /\x20+/g, ',' ) + ','
+    R = R.replace /,ɝ,/g,           ',ɜ,r,'
+    R = R.replace /,/g,             ''
+    return R
+
+  #---------------------------------------------------------------------------------------------------------
+  ipa_from_britfone_ipa_raw: ( ipa_raw ) ->
+    R = ipa_raw
+    R = ',' + ( R.replace /\x20+/g, ',' ) + ','
+    # R = R.replace /,ɝ,/g,           ',ɜ,r,'
+    R = R.replace /,/g,             ''
     return R
 
 
