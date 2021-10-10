@@ -194,10 +194,10 @@ class @Cmud
   _populate_db: ->
     @_populate_arpabet_trlits()
     # @_populate_xsampa_to_ipa()
-    @_populate_entries()
+    @_populate_cmu_entries()
 
   #---------------------------------------------------------------------------------------------------------
-  _populate_entries: ->
+  _populate_cmu_entries: ->
     @_truncate_entries()
     count         = 0
     insert_entry  = @db.prepare @sql.insert_entry
