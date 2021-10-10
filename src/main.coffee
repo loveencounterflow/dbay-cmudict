@@ -99,8 +99,8 @@ class @Cmud
           id        integer not null primary key,
           word      text    not null,
           source    text    not null references source_nicks ( nick ),
-          ipa_raw   text    not null,
-          ipa       text    not null );
+          ipa       text    not null,
+          ipa_raw   text    not null );
       create index #{schema}.entries_word_idx on entries ( word );
       create index #{schema}.entries_ipa_idx  on entries ( ipa );
       -- ...................................................................................................
