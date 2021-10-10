@@ -83,37 +83,27 @@ class @Cmud
       schema } = @cfg
     @db.execute SQL"""
       drop index if exists #{schema}.entries_word_idx;
+      drop index if exists #{schema}.entries_ipa_idx;
       drop table if exists #{schema}.trlits;
       drop table if exists #{schema}.trlit_nicks;
       drop table if exists #{schema}.abs_phones;
       drop table if exists #{schema}.entries;
+      drop table if exists #{schema}.source_nicks;
       -- ...................................................................................................
       vacuum #{schema};
       -- ...................................................................................................
       create table #{schema}.entries (
           id        integer not null primary key,
           word      text    not null,
+          source    text    not null references source_nicks ( nick ),
           ipa_raw   text    not null,
           ipa       text    not null );
-      create index #{schema}.entries_word_idx
-        on entries ( word );
-      -- create index #{schema}.entries_ipa_idx
-      --   on entries ( ipa );
-      -- -- ...................................................................................................
-      -- create table #{schema}.abs_phones (
-      --     word        text    not null,
-      --     lnr         integer not null,
-      --     rnr         integer not null,
-      --     abs0_phone  text    not null,
-      --     abs1_phone  text    not null,
-      --     stress      integer,
-      --   primary key ( word, lnr ) );
+      create index #{schema}.entries_word_idx on entries ( word );
+      create index #{schema}.entries_ipa_idx  on entries ( ipa );
       -- ...................................................................................................
-      -- **Note** Table trlits collects all transliterations into a single table. This has been done for
-      -- extensibility so you don't have to modify the DB's structure just to add a transliteration scheme.
       create table #{schema}.trlits ( -- trlits: transliterations
           ipa         text    not null,
-          nick        text    not null, -- code for transliterations
+          nick        text    not null references trlit_nicks ( nick ),
           trlit       text    not null,
           example     text,
         primary key ( ipa, nick ) );
@@ -122,16 +112,21 @@ class @Cmud
           name        text    not null,
           comment     text,
         primary key ( nick ) );
-      -- -- ...................................................................................................
-      -- create view #{schema}.abs_phones as select
-      --     r1.word   as word,
-      --     r2.lnr    as lnr,
-      --     r2.rnr    as rnr,
-      --     r2.part   as abs1_phone
-      --   from
-      --     entries                           as r1,
-      --     std_str_split_re( r1.abs1, '\s' ) as r2;
+      create table #{schema}.source_nicks (
+          nick        text    not null,
+          name        text    not null,
+          comment     text,
+        primary key ( nick ) );
       """
+      # -- -- ...................................................................................................
+      # -- create view #{schema}.abs_phones as select
+      # --     r1.word   as word,
+      # --     r2.lnr    as lnr,
+      # --     r2.rnr    as rnr,
+      # --     r2.part   as abs1_phone
+      # --   from
+      # --     entries                           as r1,
+      # --     std_str_split_re( r1.abs1, '\s' ) as r2;
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -142,11 +137,21 @@ class @Cmud
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
       truncate_entries:     SQL"delete from #{schema}.entries;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, ipa_raw, ipa )
-          values ( $word, $ipa_raw, $ipa );"""
+        insert into #{schema}.entries ( word, source, ipa_raw, ipa )
+          values ( $word, $source, $ipa_raw, $ipa );"""
       insert_trlit: SQL"""
         insert into #{schema}.trlits ( ipa, nick, trlit, example )
           values ( $ipa, $nick, $trlit, $example );"""
+      upsert_source_nick: SQL"""
+        insert into #{schema}.source_nicks ( nick, name, comment )
+          values ( $nick, $name, $comment )
+          on conflict ( nick ) do update set
+            name = excluded.name, comment = excluded.comment;"""
+      upsert_trlit_nick: SQL"""
+        insert into #{schema}.trlit_nicks ( nick, name, comment )
+          values ( $nick, $name, $comment )
+          on conflict ( nick ) do update set
+            name = excluded.name, comment = excluded.comment;"""
       delete_arpabet_trlits: SQL"""
         delete from #{schema}.trlits
           where nick in ( 'ab1', 'ab2' );
@@ -193,9 +198,11 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _populate_entries: ->
-    count = 0
     @_truncate_entries()
-    insert_entry = @db.prepare @sql.insert_entry
+    count         = 0
+    insert_entry  = @db.prepare @sql.insert_entry
+    source        = 'cmu'
+    @db @sql.upsert_source_nick, { nick: source, name: "CMUdict", comment: "v0.7b", }
     @db =>
       for line from guy.fs.walk_lines @cfg.source_path
         continue if line.startsWith ';;;'
@@ -215,7 +222,7 @@ class @Cmud
         word      = word.toLowerCase()
         ipa_raw   = @ipa_raw_from_arpabet2  ab
         ipa       = @ipa_from_ipa_raw       ipa_raw
-        insert_entry.run { word, ipa_raw, ipa, }
+        insert_entry.run { word, source, ipa_raw, ipa, }
       return null
     return null
 
@@ -224,7 +231,8 @@ class @Cmud
     @_delete_arpabet_trlits()
     line_nr       = 0
     insert_trlit  = @db.prepare @sql.insert_trlit
-    ### TAINT insert into trlit registry ###
+    @db @sql.upsert_trlit_nick, { nick: 'ab1', name: "ARPAbet1", comment: null, }
+    @db @sql.upsert_trlit_nick, { nick: 'ab2', name: "ARPAbet2", comment: null, }
     @db =>
       for line from guy.fs.walk_lines @cfg.abipa_path
         line_nr++
