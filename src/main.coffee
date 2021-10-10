@@ -436,9 +436,10 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   ipa_from_britfone_ipa_raw: ( ipa_raw ) ->
     R = ipa_raw
-    R = ',' + ( R.replace /\x20+/g, ',' ) + ','
-    # R = R.replace /,ɝ,/g,           ',ɜ,r,'
-    R = R.replace /,/g,             ''
+    R = R.replace /\x20+/g, ''
+    # R = ',' + ( R.replace /\x20+/g, ',' ) + ','
+    # # R = R.replace /,ɝ,/g,           ',ɜ,r,'
+    # R = R.replace /,/g,             ''
     return R
 
 
