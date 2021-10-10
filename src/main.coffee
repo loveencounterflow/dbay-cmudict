@@ -202,7 +202,7 @@ class @Cmud
         line                  = line.trimEnd()
         [ word, ab, ]         = line.split '\x20\x20'
         word                  = word.trim()
-        continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
+        # continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
         continue if ( word.match /'S\(\d\)$/ )?
         if ( not word? ) or ( word.length is 0 ) or ( not ab? ) or ( ab.length is 0 )
           warn '^4443^', count, ( rpr line )
