@@ -22,7 +22,8 @@ types                     = require './types'
   validate_list_of }      = types.export()
 SQL                       = String.raw
 guy                       = require 'guy'
-
+home                      = PATH.resolve PATH.join __dirname, '..'
+data_path                 = PATH.join home, 'data'
 
 #===========================================================================================================
 class @Cmud
@@ -36,10 +37,10 @@ class @Cmud
         db:               null
         prefix:           'cmud_'
         schema:           'cmud'
-        path:             PATH.resolve PATH.join __dirname, '../cmudict.sqlite'
-        source_path:      PATH.resolve PATH.join __dirname, '../cmudict-0.7b'
-        abipa_path:       PATH.resolve PATH.join __dirname, '../arpabet-to-ipa.tsv'
-        xsipa_path:       PATH.resolve PATH.join __dirname, '../xsampa-to-ipa.tsv'
+        path:             PATH.join home, 'cmudict.sqlite'
+        source_path:      PATH.join data_path, 'cmudict-0.7b'
+        abipa_path:       PATH.join data_path, 'arpabet-to-ipa.tsv'
+        xsipa_path:       PATH.join data_path, 'xsampa-to-ipa.tsv'
         create:           false
         max_entry_count:  Infinity
 
