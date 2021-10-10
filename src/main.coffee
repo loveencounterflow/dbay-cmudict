@@ -37,10 +37,13 @@ class @Cmud
         db:               null
         prefix:           'cmud_'
         schema:           'cmud'
-        path:             PATH.join home, 'cmudict.sqlite'
-        source_path:      PATH.join data_path, 'cmudict-0.7b'
-        abipa_path:       PATH.join data_path, 'arpabet-to-ipa.tsv'
-        xsipa_path:       PATH.join data_path, 'xsampa-to-ipa.tsv'
+        path:             PATH.join home,      'cmudict.sqlite'
+        paths:
+          cmu:            PATH.join data_path, 'cmudict-0.7b'
+          beep:           PATH.join data_path, 'beep/beep-1.0'
+          spellings:      PATH.join data_path, 'beep/case.txt'
+          abipa:          PATH.join data_path, 'arpabet-to-ipa.tsv'
+          xsipa:          PATH.join data_path, 'xsampa-to-ipa.tsv'
         create:           false
         max_entry_count:  Infinity
 
@@ -135,7 +138,7 @@ class @Cmud
       schema }  = @cfg
     sql         =
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
-      truncate_entries:     SQL"delete from #{schema}.entries;"
+      truncate_entries:     SQL"delete from #{schema}.entries where source = $source;"
       insert_entry: SQL"""
         insert into #{schema}.entries ( word, source, ipa_raw, ipa )
           values ( $word, $source, $ipa_raw, $ipa );"""
@@ -177,7 +180,7 @@ class @Cmud
 
   #---------------------------------------------------------------------------------------------------------
   _get_db_object_count:   -> @db.single_value @sql.get_db_object_count
-  _truncate_entries:      -> @db @sql.truncate_entries
+  _truncate_entries:      ( source ) -> @db @sql.truncate_entries, { source, }
   _delete_arpabet_trlits: -> @db @sql.delete_arpabet_trlits
 
   #---------------------------------------------------------------------------------------------------------
@@ -194,23 +197,23 @@ class @Cmud
   _populate_db: ->
     @_populate_arpabet_trlits()
     # @_populate_xsampa_to_ipa()
+    @_cache_spellings()
     @_populate_cmu_entries()
+    @_populate_beep_entries()
 
   #---------------------------------------------------------------------------------------------------------
   _populate_cmu_entries: ->
-    @_truncate_entries()
     count         = 0
     insert_entry  = @db.prepare @sql.insert_entry
     source        = 'cmu'
+    @_truncate_entries source
     @db @sql.upsert_source_nick, { nick: source, name: "CMUdict", comment: "v0.7b", }
     @db =>
-      for line from guy.fs.walk_lines @cfg.source_path
+      for line from guy.fs.walk_lines @cfg.paths.cmu
         continue if line.startsWith ';;;'
         line                  = line.trimEnd()
         [ word, ab, ]         = line.split '\x20\x20'
         word                  = word.trim()
-        # continue if ( word.endsWith "'S" ) or ( word.endsWith "'" )
-        continue if ( word.match /'S\(\d\)$/ )?
         if ( not word? ) or ( word.length is 0 ) or ( not ab? ) or ( ab.length is 0 )
           warn '^4443^', count, ( rpr line )
           continue
@@ -220,10 +223,66 @@ class @Cmud
           warn '^dbay-cmudict/main@1^', "shortcutting at #{@cfg.max_entry_count} entries"
           break
         word      = word.toLowerCase()
+        word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
         ipa_raw   = @ipa_raw_from_arpabet2  ab
         ipa       = @ipa_from_ipa_raw       ipa_raw
         insert_entry.run { word, source, ipa_raw, ipa, }
       return null
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _populate_beep_entries: ->
+    count         = 0
+    insert_entry  = @db.prepare @sql.insert_entry
+    source        = 'be'
+    @_truncate_entries source
+    @db @sql.upsert_source_nick, { nick: source, name: "BEEP", comment: "v1.0", }
+    @db =>
+      for line from guy.fs.walk_lines @cfg.paths.beep
+        continue if line.startsWith '#'
+        line = line.trim()
+        continue if line.length is 0
+        continue unless ( match = line.match /(?<word>\S+)\s+(?<ab>.*)$/ )?
+        { word
+          ab    } = match.groups
+        if ( word.length is 0 ) or ( ab.length is 0 )
+          warn '^4443^', count, ( rpr line )
+          continue
+        #...................................................................................................
+        count++
+        if count > @cfg.max_entry_count
+          warn '^dbay-cmudict/main@2^', "shortcutting at #{@cfg.max_entry_count} entries"
+          break
+        word      = word.toLowerCase()
+        word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
+        word      = word.replace /_/g, '\x20'
+        ipa_raw   = @ipa_raw_from_arpabet2  ab
+        # ipa       = @ipa_from_ipa_raw       ipa_raw
+        ipa       = ipa_raw.replace /\x20+/g, ''
+        insert_entry.run { word, source, ipa_raw, ipa, }
+      return null
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _cache_spellings: ->
+    cache = ( @cache.spellings ?= {} )
+    count = 0
+    for line from guy.fs.walk_lines @cfg.paths.spellings
+      continue if line.startsWith '#'
+      line = line.trim()
+      continue if line.length is 0
+      continue unless ( match = line.match /(?<lc>\S+)\s+(?<spelling>.*)$/ )?
+      #.....................................................................................................
+      count++
+      if count > @cfg.max_entry_count
+        warn '^dbay-cmudict/main@3^', "shortcutting at #{@cfg.max_entry_count} entries"
+        break
+      #.....................................................................................................
+      { lc,
+        spelling, } = match.groups
+      lc            = lc.toLowerCase()
+      spelling      = spelling.trimEnd()
+      cache[ lc ]   = spelling
     return null
 
   #---------------------------------------------------------------------------------------------------------
@@ -234,7 +293,7 @@ class @Cmud
     @db @sql.upsert_trlit_nick, { nick: 'ab1', name: "ARPAbet1", comment: null, }
     @db @sql.upsert_trlit_nick, { nick: 'ab2', name: "ARPAbet2", comment: null, }
     @db =>
-      for line from guy.fs.walk_lines @cfg.abipa_path
+      for line from guy.fs.walk_lines @cfg.paths.abipa
         line_nr++
         line              = line.trim()
         continue if line.length is 0
@@ -268,7 +327,7 @@ class @Cmud
     xs_by_ipa   = {} ### #cache ###
     insert      = @db.prepare @sql.insert_xsipa
     @db =>
-      for line from guy.fs.walk_lines @cfg.xsipa_path
+      for line from guy.fs.walk_lines @cfg.paths.xsipa
         line_nr++
         line              = line.trim()
         continue if line.length is 0
