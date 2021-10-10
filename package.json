@@ -29,12 +29,13 @@
   },
   "homepage": "https://github.com/loveencounterflow/dbay-cmudict#readme",
   "dependencies": {
+    "britfone": "100.0.1",
     "cnd": "9.2.2",
-    "guy": "2.4.0",
+    "guy": "2.5.0",
     "intertype": "7.6.7"
   },
   "devDependencies": {
-    "dbay": "0.110.0"
+    "dbay": "0.111.0"
   },
   "peerDependencies": {
     "dbay": "^0.109.0"

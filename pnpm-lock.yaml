@@ -1,20 +1,26 @@
 lockfileVersion: 5.3
 
 specifiers:
+  britfone: 100.0.1
   cnd: 9.2.2
-  dbay: 0.110.0
-  guy: 2.4.0
+  dbay: 0.111.0
+  guy: 2.5.0
   intertype: 7.6.7
 
 dependencies:
+  britfone: 100.0.1
   cnd: 9.2.2
-  guy: 2.4.0
+  guy: 2.5.0
   intertype: 7.6.7
 
 devDependencies:
-  dbay: 0.110.0
+  dbay: 0.111.0
 
 packages:
+
+  /britfone/100.0.1:
+    resolution: {integrity: sha512-9WlxZdL/8uuIWczs5b9Ge61r+xbQlqSKEJzMhLGV6BZuoahOlgX/nS1cSCxJ1uWP5z+5yTAKEbxun1YmU3MAtg==}
+    dev: false
 
   /cnd/9.2.2:
     resolution: {integrity: sha512-F+/H+7luk4fZkvN0+MT0I2nwn80YM/EtfMttNUFxENR50XJH4g0KgQevzeyEJ8B6t6l8Tb4Xti6QAksa8DmePA==}
@@ -22,13 +28,13 @@ packages:
     dependencies:
       jsx-number-format: 0.1.4
 
-  /dbay/0.110.0:
-    resolution: {integrity: sha512-lNB7VEtrlt06c+RbfnzUmjRUqb9ssTOPsJ+v/Y6AAulfrf6qPV/k1t87hEawMErQiktSALaZgDVJtjAts/wc/Q==}
+  /dbay/0.111.0:
+    resolution: {integrity: sha512-j7kP07djrKMmqaM2YRzC/p6dGls9Fn7Tp28thUTx2Z/ugbKt8EysBi/DklVxakF2cATSxFg9XqloeO0yP/sEXg==}
     requiresBuild: true
     dependencies:
       cnd: 9.2.2
       exit-hook: 2.2.1
-      guy: 2.3.0
+      guy: 2.5.0
       intertype: 7.6.7
     transitivePeerDependencies:
       - deasync
@@ -39,25 +45,14 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /guy/2.3.0:
-    resolution: {integrity: sha512-tAOe7lJUi0RylpuZICAJSsApylGANmX2a/FFb5N/CRwy5JzR67HoDGVLeOjUr25aFee9n092BYu+Y5B1P9h/mg==}
+  /guy/2.5.0:
+    resolution: {integrity: sha512-H+pVvZdLa7BGmg5M+vPFEgnMD6e+p9zMQVhj7A2dlgQLO+20v23ZpdjAt6c47OfmtXiFZ2dyU4mhRSAv3EJqMg==}
     peerDependencies:
       deasync: ^0.1.22
     dependencies:
       cnd: 9.2.2
       intertype: 7.6.7
       letsfreezethat: 3.1.0
-    dev: true
-
-  /guy/2.4.0:
-    resolution: {integrity: sha512-c2yep9EZNnKzjmiRe08dTISI3sfxOKWOGTKU3XKaCgNtrY5r514IR1RAL3DDVu3rlU0DPjmb/1oyAB9gZjNIaw==}
-    peerDependencies:
-      deasync: ^0.1.22
-    dependencies:
-      cnd: 9.2.2
-      intertype: 7.6.7
-      letsfreezethat: 3.1.0
-    dev: false
 
   /intertype/7.6.7:
     resolution: {integrity: sha512-vBgYabqxX3fLa9f0Z3QeXgYszadAGdAHXdLcdQc5ZxZSG5CmbJCdYcudZLYtgmNo8epQag8zzyg7wwx+OD5J8g==}
