@@ -66,6 +66,7 @@ The 𓆤DBay 𓅗CMUdict takes the [ARPAbet](https://en.wikipedia.org/wiki/ARPAB
 * **[–]** keep transliterations with vs transliterations without stree marking in two separate tables? Or
   better use a flag field.
 * **[–]** remove / translate (into a field value) counter that indicates variants.
-
+* **[–]** replace remaining underscores with spaces
+* **[–]** recognize acronyms and remove spaces, correct case, as in `i_p_a` -> `IPA`, `d_c` -> `DC` &c.
 
 
