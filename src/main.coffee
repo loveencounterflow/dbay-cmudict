@@ -103,6 +103,7 @@ class @Cmud
           id        integer not null primary key,
           word      text    not null,
           source    text    not null references source_nicks ( nick ),
+          nr        integer not null default 1,
           ipa       text    not null,
           ipa_raw   text    not null );
       create index #{schema}.entries_word_idx on entries ( word );
@@ -144,8 +145,8 @@ class @Cmud
       get_db_object_count:  SQL"select count(*) as count from #{schema}.sqlite_schema;"
       truncate_entries:     SQL"delete from #{schema}.entries where source = $source;"
       insert_entry: SQL"""
-        insert into #{schema}.entries ( word, source, ipa_raw, ipa )
-          values ( $word, $source, $ipa_raw, $ipa );"""
+        insert into #{schema}.entries ( word, source, nr, ipa_raw, ipa )
+          values ( $word, $source, $nr, $ipa_raw, $ipa );"""
       insert_trlit: SQL"""
         insert into #{schema}.trlits ( ipa, nick, trlit, example )
           values ( $ipa, $nick, $trlit, $example );"""
@@ -227,11 +228,13 @@ class @Cmud
         if count > @cfg.max_entry_count
           warn '^dbay-cmudict/main@1^', "shortcutting at #{@cfg.max_entry_count} entries"
           break
+        { word
+          nr    } = @_get_bracketed_nr word
         word      = word.toLowerCase()
         word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
         ipa_raw   = @ipa_raw_from_arpabet2  ab
         ipa       = @ipa_from_cmu_ipa_raw       ipa_raw
-        insert_entry.run { word, source, ipa_raw, ipa, }
+        insert_entry.run { word, source, nr, ipa_raw, ipa, }
       return null
     return null
 
@@ -240,6 +243,7 @@ class @Cmud
     count         = 0
     insert_entry  = @db.prepare @sql.insert_entry
     source        = 'be'
+    nr            = 1
     @_truncate_entries source
     @db @sql.upsert_source_nick, { nick: source, name: "BEEP", comment: "v1.0", }
     @db =>
@@ -263,7 +267,7 @@ class @Cmud
         word      = @_rewrite_beep_word word
         ipa_raw   = @ipa_raw_from_arpabet2  ab
         ipa       = @ipa_from_beep_ipa_raw  ipa_raw
-        insert_entry.run { word, source, ipa_raw, ipa, }
+        insert_entry.run { word, source, nr, ipa_raw, ipa, }
       return null
     return null
 
@@ -290,11 +294,13 @@ class @Cmud
         if count > @cfg.max_entry_count
           warn '^dbay-cmudict/main@2^', "shortcutting at #{@cfg.max_entry_count} entries"
           break
+        { word
+          nr    } = @_get_bracketed_nr word
         word      = word.toLowerCase()
         word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
         # word      = word.replace /_/g, '\x20'
         ipa       = @ipa_from_britfone_ipa_raw  ipa_raw
-        insert_entry.run { word, source, ipa_raw, ipa, }
+        insert_entry.run { word, source, nr, ipa_raw, ipa, }
       return null
     return null
 
@@ -443,6 +449,14 @@ class @Cmud
     return R
 
   #---------------------------------------------------------------------------------------------------------
+  _get_bracketed_nr: ( word ) ->
+    nr    = 1
+    word  = word.replace /\((\d+)\)$/, ( $0, $1, index ) =>
+      nr = parseInt $1, 10
+      return ''
+    return { word, nr, }
+
+  #---------------------------------------------------------------------------------------------------------
   _rewrite_beep_word: ( word ) ->
     R = word
     R = R.replace /_/g,     '\x20'
@@ -456,4 +470,5 @@ class @Cmud
     return R
 
 # f\^ete
+
 
