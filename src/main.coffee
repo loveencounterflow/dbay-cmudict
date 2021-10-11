@@ -469,6 +469,5 @@ class @Cmud
     R = R.replace /\\\^o/g, 'ô'
     return R
 
-# f\^ete
 
 
