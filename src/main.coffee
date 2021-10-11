@@ -260,7 +260,7 @@ class @Cmud
           break
         word      = word.toLowerCase()
         word      = @cache.spellings[ word ] ? word ### replace LC variant with correct upper/lower case where found ###
-        word      = word.replace /_/g, '\x20'
+        word      = @_rewrite_beep_word word
         ipa_raw   = @ipa_raw_from_arpabet2  ab
         ipa       = @ipa_from_beep_ipa_raw  ipa_raw
         insert_entry.run { word, source, ipa_raw, ipa, }
@@ -442,4 +442,18 @@ class @Cmud
     # R = R.replace /,/g,             ''
     return R
 
+  #---------------------------------------------------------------------------------------------------------
+  _rewrite_beep_word: ( word ) ->
+    R = word
+    R = R.replace /_/g,     '\x20'
+    R = R.replace /\\'a/g,  'á'
+    R = R.replace /\\`a/g,  'à'
+    R = R.replace /\\\^a/g, 'â'
+    R = R.replace /\\'e/g,  'é'
+    R = R.replace /\\`e/g,  'è'
+    R = R.replace /\\\^e/g, 'ê'
+    R = R.replace /\\\^o/g, 'ô'
+    return R
+
+# f\^ete
 
