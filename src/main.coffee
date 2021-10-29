@@ -48,7 +48,7 @@ class @Cmud
           spellings:      PATH.join data_path, 'beep/case.txt'
           abipa:          PATH.join data_path, 'arpabet-to-ipa.tsv'
           xsipa:          PATH.join data_path, 'xsampa-to-ipa.tsv'
-        create:           false
+        rebuild:          false
         max_entry_count:  Infinity
 
   #---------------------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ class @Cmud
   #---------------------------------------------------------------------------------------------------------
   _open_cmu_db: ->
     @db.open @cfg
-    if @cfg.create or ( @_get_db_object_count() is 0 )
+    if @cfg.rebuild or ( @_get_db_object_count() is 0 )
       @_create_db_structure()
       @_populate_db()
     else
