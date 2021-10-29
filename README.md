@@ -68,5 +68,7 @@ The 𓆤DBay 𓅗CMUdict takes the [ARPAbet](https://en.wikipedia.org/wiki/ARPAB
 * **[–]** remove / translate (into a field value) counter that indicates variants.
 * **[–]** replace remaining underscores with spaces
 * **[–]** recognize acronyms and remove spaces, correct case, as in `i_p_a` -> `IPA`, `d_c` -> `DC` &c.
+* **[+]** ensure that running tests does not affect contents of `cmudict.sqlite`
+* **[+]** rename `cfg.create` to `cfg.rebuild`
 
 
