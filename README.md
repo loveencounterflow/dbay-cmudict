@@ -36,6 +36,8 @@ The 𓆤DBay 𓅗CMUdict takes the [ARPAbet](https://en.wikipedia.org/wiki/ARPAB
 * [ARPAbet](https://en.wikipedia.org/wiki/ARPABET)
 * [X-SAMPA](https://en.wikipedia.org/wiki/X-SAMPA)
 * [BEEP](https://www.openslr.org/14/)
+* [Britfone](https://github.com/JoseLlarena/Britfone)
+
 
 ## To Do
 
